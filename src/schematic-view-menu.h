@@ -1,16 +1,18 @@
 /*
- * schematic-view.c
+ * schematic-view-menu.h
  *
  *
  * Authors:
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -31,7 +33,7 @@
 #ifndef _SCHEMATIC_VIEW_MENU_
 #define _SCHEMATIC_VIEW_MENU_
 static GtkActionEntry entries[] = {
-	/* Name, ICON, Text, CTRL, DESC, CALLBACK */
+	// Name, ICON, Text, CTRL, DESC, CALLBACK 
 	{"MenuFile", NULL, N_("_File")},
 	{"MenuEdit", NULL, N_("_Edit")},
 	{"MenuTools", NULL, N_("_Tools")},
@@ -40,10 +42,10 @@ static GtkActionEntry entries[] = {
 	{"MenuZoom", NULL, N_("_Zoom")},
 	{"New", GTK_STOCK_NEW, N_("_New"), "<control>N", N_("Create a new schematic"), G_CALLBACK (new_cmd)},
 	{"Open", GTK_STOCK_OPEN, N_("_Open"), "<control>O", N_("Open a schematic"), G_CALLBACK (open_cmd)},
-	{"DisplayRecentFiles", NULL, N_("_Recent Files"), NULL, NULL, NULL}, //G_CALLBACK (display_recent_files)},
+	{"DisplayRecentFiles", NULL, N_("_Recent Files"), NULL, NULL, NULL}, 
 	{"Save", GTK_STOCK_SAVE, N_("_Save"), "<control>S", N_("Save a schematic"), G_CALLBACK (save_cmd)},
 	{"SaveAs", GTK_STOCK_SAVE_AS, N_("Save _As..."), "<control><shift>S", N_("Save a schematic with other name"), G_CALLBACK (save_as_cmd)},
-	{"PageProperties", NULL, N_("Page Properties"), NULL, N_("Set print properties"), G_CALLBACK (page_properties_cmd)},
+	{"PrintProperties", NULL, N_("Print Properties"), NULL, N_("Set print properties"), G_CALLBACK (page_properties_cmd)},
 	{"Print", GTK_STOCK_PRINT, N_("_Print"), NULL, N_("Print schematic"), G_CALLBACK (print_cmd)},
 	{"PrintPreview", GTK_STOCK_PRINT_PREVIEW, N_("Print Preview"), NULL, N_("Preview the schematic before printing"), G_CALLBACK (print_preview_cmd)},
 	{"SchematicProperties", NULL, N_("Schematic Pr_operties..."), NULL, N_("Modify the schematic's properties"), G_CALLBACK (properties_cmd)},
@@ -64,9 +66,11 @@ static GtkActionEntry entries[] = {
 	{"Settings", NULL, N_("_Preferences"), NULL, N_("Edit Oregano settings"), G_CALLBACK (settings_show)},
 	{"Simulate", GTK_STOCK_EXECUTE, N_("_Simulate"), "F5",  N_("Run a simulation"), G_CALLBACK (simulate_cmd)},
 	{"Netlist", NULL, N_("_Generate netlist"), NULL, N_("Generate a netlist"), G_CALLBACK (netlist_cmd)},
+	{"SmartSearch", NULL, N_("Smart Search"), NULL, N_("Search a part within all the librarys"), G_CALLBACK (smartsearch_cmd)},
 	{"Log", NULL, N_("_Log"), NULL, N_("View the latest simulation log"), G_CALLBACK (log_cmd)},
 	{"NetlistView", NULL, N_("N_etlist"), NULL, N_("View the circuit netlist"), G_CALLBACK (netlist_view_cmd)},
 	{"About", GTK_STOCK_HELP, N_("_About"), NULL, N_("About Oregano"), G_CALLBACK (about_cmd)},
+	{"UserManual", NULL, N_("User's Manual"), NULL, N_("Oregano User's Manual"), G_CALLBACK (show_help)},
 	{"ZoomIn", GTK_STOCK_ZOOM_IN, N_("Zoom _In"), NULL, N_("Zoom in"), G_CALLBACK (zoom_in_cmd)},
 	{"ZoomOut", GTK_STOCK_ZOOM_OUT, N_("Zoom _Out"), NULL, N_("Zoom out"), G_CALLBACK (zoom_out_cmd)},
 };
@@ -102,7 +106,7 @@ static const char *ui_description =
 "      <menuitem action='Save'/>"
 "      <menuitem action='SaveAs'/>"
 "      <separator/>"
-"      <menuitem action='PageProperties'/>"
+"      <menuitem action='PrintProperties'/>"
 "      <menuitem action='Print'/>"
 "      <menuitem action='PrintPreview'/>"
 "      <separator/>"
@@ -134,6 +138,8 @@ static const char *ui_description =
 "      <menuitem action='Simulate'/>"
 "      <separator/>"
 "      <menuitem action='Netlist'/>"
+"      <separator/>"
+"	   <menuitem action='SmartSearch'/>"
 "    </menu>"
 "    <menu action='MenuView'>"
 "      <menu action='MenuZoom'>"
@@ -149,10 +155,11 @@ static const char *ui_description =
 "      <menuitem action='NetlistView'/>"
 "    </menu>"
 "    <menu action='MenuHelp'>"
+"      <menuitem action='UserManual'/>"
 "      <menuitem action='About'/>"
 "    </menu>"
 "  </menubar>"
-"  <toolbar name='StandartToolbar'>"
+"  <toolbar name='StandardToolbar'>"
 "    <toolitem action='New'/>"
 "    <toolitem action='Open'/>"
 "    <toolitem action='Save'/>"

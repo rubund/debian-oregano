@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,14 +29,16 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#include <gnome.h>
+
+#include <goocanvas.h>
 #include <string.h>
+#include <glib/gi18n.h>
+
 #include "xml-compat.h"
-#include "main.h"
+#include "oregano.h"
 #include "xml-helper.h"
 #include "load-common.h"
 #include "load-library.h"
-#include "sheet-private.h"
 #include "part-label.h"
 
 typedef enum {
@@ -78,12 +82,12 @@ typedef struct {
 	gint unknown_depth;
 	GString *content;
 
-	/* Temporary placeholder for part */
+	// Temporary placeholder for part 
 	LibraryPart *part;
 	PartLabel *label;
 	Property *property;
 
-	/* Temporary placeholder for symbol */
+	// Temporary placeholder for symbol 
 	LibrarySymbol *symbol;
 	Connection *connection;
 	SymbolObject *object;
@@ -102,30 +106,30 @@ static void my_error (void *user_data, const char *msg, ...);
 static void my_fatal_error (void *user_data, const char *msg, ...);
 
 static xmlSAXHandler oreganoSAXParser = {
-	0, /* internalSubset */
-	0, /* isStandalone */
-	0, /* hasInternalSubset */
-	0, /* hasExternalSubset */
-	0, /* resolveEntity */
-	(getEntitySAXFunc) get_entity, /* getEntity */
-	0, /* entityDecl */
-	0, /* notationDecl */
-	0, /* attributeDecl */
-	0, /* elementDecl */
-	0, /* unparsedEntityDecl */
-	0, /* setDocumentLocator */
-	(startDocumentSAXFunc) start_document, /* startDocument */
-	(endDocumentSAXFunc) end_document, /* endDocument */
-	(startElementSAXFunc)start_element, /* startElement */
-	(endElementSAXFunc)end_element, /* endElement */
-	0, /* reference */
-	(charactersSAXFunc) my_characters, /* characters */
-	0, /* ignorableWhitespace */
-	0, /* processingInstruction */
-	0, /*(commentSAXFunc)0,	 comment */
-	(warningSAXFunc)my_warning, /* warning */
-	(errorSAXFunc)my_error, /* error */
-	(fatalErrorSAXFunc)my_fatal_error, /* fatalError */
+	0, // internalSubset 
+	0, // isStandalone 
+	0, // hasInternalSubset 
+	0, // hasExternalSubset 
+	0, // resolveEntity 
+	(getEntitySAXFunc) get_entity, // getEntity 
+	0, // entityDecl 
+	0, // notationDecl 
+	0, // attributeDecl 
+	0, // elementDecl 
+	0, // unparsedEntityDecl 
+	0, // setDocumentLocator 
+	(startDocumentSAXFunc) start_document, // startDocument 
+	(endDocumentSAXFunc) end_document, // endDocument 
+	(startElementSAXFunc)start_element, // startElement 
+	(endElementSAXFunc)end_element, // endElement 
+	0, // reference 
+	(charactersSAXFunc) my_characters, // characters 
+	0, // ignorableWhitespace 
+	0, // processingInstruction 
+	0, // (commentSAXFunc)0,	 comment 
+	(warningSAXFunc)my_warning, // warning 
+	(errorSAXFunc)my_error, // error 
+	(fatalErrorSAXFunc)my_fatal_error, // fatalError 
 };
 
 LibrarySymbol *
@@ -161,7 +165,7 @@ library_get_part (Library *library, const gchar *part_name)
 	g_return_val_if_fail (part_name != NULL, NULL);
 
 	part = g_hash_table_lookup (library->part_hash, part_name);
-	if (part == NULL){
+	if (part == NULL) {
 		g_message (_("Could not find the requested part: %s\n"), part_name);
 	}
 	return part;
@@ -179,7 +183,8 @@ library_parse_xml_file (const gchar *filename)
 
 	if (state.state == PARSE_ERROR) {
 		library = NULL;
-	} else {
+	} 
+	else {
 		library = state.library;
 	}
 
@@ -226,7 +231,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (strcmp (name, "ogo:library")) {
 			g_warning ("Expecting 'ogo:library'.  Got '%s'", name);
 			state->state = PARSE_ERROR;
-		} else
+		} 
+		else
 			state->state = PARSE_LIBRARY;
 		break;
 
@@ -234,14 +240,18 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:author")) {
 			state->state = PARSE_AUTHOR;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:name")) {
+		} 
+		else if (!strcmp (name, "ogo:name")) {
 			state->state = PARSE_NAME;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:symbols")) {
+		} 
+		else if (!strcmp (name, "ogo:symbols")) {
 			state->state = PARSE_SYMBOLS;
-		} else if (!strcmp (name, "ogo:parts")) {
+		} 
+		else if (!strcmp (name, "ogo:parts")) {
 			state->state = PARSE_PARTS;
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -252,7 +262,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:symbol")) {
 			state->state = PARSE_SYMBOL;
 			state->symbol = g_new0 (LibrarySymbol, 1);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -263,11 +274,14 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:name")) {
 			state->state = PARSE_SYMBOL_NAME;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:objects")) {
+		} 
+		else if (!strcmp (name, "ogo:objects")) {
 			state->state = PARSE_SYMBOL_OBJECTS;
-		} else if (!strcmp (name, "ogo:connections")) {
+		} 
+		else if (!strcmp (name, "ogo:connections")) {
 			state->state = PARSE_SYMBOL_CONNECTIONS;
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -279,17 +293,20 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 			state->object->type = SYMBOL_OBJECT_LINE;
 			state->state = PARSE_SYMBOL_LINE;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:arc")) {
+		} 
+		else if (!strcmp (name, "ogo:arc")) {
 			state->object = g_new0 (SymbolObject, 1);
 			state->object->type = SYMBOL_OBJECT_ARC;
 			state->state = PARSE_SYMBOL_ARC;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:text")) {
+		} 
+		else if (!strcmp (name, "ogo:text")) {
 			state->object = g_new0 (SymbolObject, 1);
 			state->object->type = SYMBOL_OBJECT_TEXT;
 			state->state = PARSE_SYMBOL_TEXT;
 			g_string_truncate (state->content, 0);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -301,7 +318,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 			state->state = PARSE_SYMBOL_CONNECTION;
 			state->connection = g_new0 (Connection, 1);
 			g_string_truncate (state->content, 0);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -314,7 +332,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 			state->state = PARSE_PART;
 			state->part = g_new0 (LibraryPart, 1);
 			state->part->library = state->library;
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -324,17 +343,22 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:name")) {
 			state->state = PARSE_PART_NAME;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:description")) {
+		} 
+		else if (!strcmp (name, "ogo:description")) {
 			state->state = PARSE_PART_DESCRIPTION;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:symbol")) {
+		} 
+		else if (!strcmp (name, "ogo:symbol")) {
 			state->state = PARSE_PART_USESYMBOL;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:labels")) {
+		} 
+		else if (!strcmp (name, "ogo:labels")) {
 			state->state = PARSE_PART_LABELS;
-		} else if (!strcmp (name, "ogo:properties")) {
+		} 
+		else if (!strcmp (name, "ogo:properties")) {
 			state->state = PARSE_PART_PROPERTIES;
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -344,7 +368,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:label")) {
 			state->state = PARSE_PART_LABEL;
 			state->label = g_new0 (PartLabel, 1);
-		} else {
+		}
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -354,13 +379,16 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:name")) {
 			state->state = PARSE_PART_LABEL_NAME;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:text")) {
+		}
+		else if (!strcmp (name, "ogo:text")) {
 			state->state = PARSE_PART_LABEL_TEXT;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:position")) {
+		} 
+		else if (!strcmp (name, "ogo:position")) {
 			state->state = PARSE_PART_LABEL_POS;
 			g_string_truncate (state->content, 0);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -371,7 +399,8 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:property")) {
 			state->state = PARSE_PART_PROPERTY;
 			state->property = g_new0 (Property, 1);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -381,10 +410,12 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		if (!strcmp (name, "ogo:name")) {
 			state->state = PARSE_PART_PROPERTY_NAME;
 			g_string_truncate (state->content, 0);
-		} else if (!strcmp (name, "ogo:value")) {
+		} 
+		else if (!strcmp (name, "ogo:value")) {
 			state->state = PARSE_PART_PROPERTY_VALUE;
 			g_string_truncate (state->content, 0);
-		} else {
+		} 
+		else {
 			state->prev_state = state->state;
 			state->state = PARSE_UNKNOWN;
 			state->unknown_depth++;
@@ -406,7 +437,7 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 	case PARSE_PART_PROPERTY_VALUE:
 	case PARSE_NAME:
 	case PARSE_AUTHOR:
-		/* there should be no tags inside these types of tags */
+		// there should be no tags inside these types of tags 
 		g_message ("*** '%s' tag found", name);
 		state->prev_state = state->state;
 		state->state = PARSE_UNKNOWN;
@@ -419,11 +450,11 @@ start_element (ParseState *state, const xmlChar *xml_name, const xmlChar **attrs
 		state->unknown_depth++;
 		break;
 	case PARSE_FINISH:
-		/* should not start new elements in this state */
+		// should not start new elements in this state 
 		g_assert_not_reached ();
 		break;
 	}
-	/*g_message("Start element %s (state %s)", name, states[state->state]);*/
+	//g_message("Start element %s (state %s)", name, states[state->state]);
 }
 
 static void
@@ -476,16 +507,16 @@ end_element (ParseState *state, const xmlChar *name)
 		points = g_strsplit (ptr, "(", 0);
 
 		i = 0;
-		/* Count the points. */
+		// Count the points. 
 		while (points[i] != NULL) {
 			i++;
 		}
 
-		/* Do not count the first string, which simply is a (. */
+		// Do not count the first string, which simply is a (. 
 		i--;
 
-		/* Construct gnome canvas points. */
-		state->object->u.uline.line = gnome_canvas_points_new (i);
+		// Construct goo canvas points. 
+		state->object->u.uline.line = goo_canvas_points_new (i);
 		for (j = 0; j < i; j++) {
 			double x, y;
 
@@ -588,18 +619,18 @@ end_element (ParseState *state, const xmlChar *name)
 		break;
 
 	case PARSE_LIBRARY:
-		/* The end of the file. */
+		// The end of the file. 
 		state->state = PARSE_FINISH;
 		break;
 	case PARSE_ERROR:
 		break;
 	case PARSE_START:
 	case PARSE_FINISH:
-		/* There should not be a closing tag in this state. */
+		// There should not be a closing tag in this state. 
 		g_assert_not_reached ();
 		break;
 	}
-	/*g_message("End element %s (state %s)", name, states[state->state]);*/
+	//g_message("End element %s (state %s)", name, states[state->state]);
 }
 
 static void

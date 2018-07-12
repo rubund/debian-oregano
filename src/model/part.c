@@ -7,11 +7,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  *
  * This program is free software; you can redistribute it and/or
@@ -31,11 +33,11 @@
  */
 
 #include <ctype.h>
-#include <gnome.h>
 #include <math.h>
 #include <string.h>
+#include <glib/gi18n.h>
+
 #include "part.h"
-#include "item-data.h"
 #include "part-property.h"
 #include "part-label.h"
 #include "node-store.h"
@@ -43,6 +45,9 @@
 #include "load-library.h"
 #include "part-private.h"
 #include "schematic-print-context.h"
+#include "dialogs.h"
+
+#define NG_DEBUG(s) if (0) g_print ("%s\n", s)
 
 static void part_class_init (PartClass *klass);
 
@@ -77,6 +82,8 @@ static void part_set_property (ItemData *data, char *property, char *value);
 
 static char *part_get_refdes_prefix (ItemData *data);
 static void part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx);
+static gboolean emit_rotated_signal_when_handler_connected (gpointer data);
+static gboolean emit_flipped_signal_when_handler_connected (gpointer data);
 
 enum {
 	ARG_0,
@@ -89,36 +96,29 @@ enum {
 	LAST_SIGNAL
 };
 
+// Structure defined to cover exchange between g_timeout_add and the
+// function in charge to emit the rotated signal only once the handler
+// has been connected.
+typedef struct {
+	Part *part;
+} SignalRotatedStruct;
+
+// Structure defined to cover exchange between g_timeout_add and the
+// function in charge to emit the flipped signal only once the handler
+// has been connected.
+typedef struct {
+	Part *    part;
+	gboolean  horizontal;
+	SheetPos *center;
+} SignalFlippedStruct;
+
+G_DEFINE_TYPE (Part, part, TYPE_ITEM_DATA)
+
 static guint part_signals [LAST_SIGNAL] = { 0 };
 static ItemDataClass *parent_class = NULL;
 
-GType
-part_get_type (void)
-{
-	static GType part_type = 0;
-
-	if (!part_type) {
-		static const GTypeInfo part_info = {
-			sizeof(PartClass),
-			NULL, /* Base Init */
-			NULL, /* Base Finalize */
-			(GClassInitFunc)part_class_init, /* Class Init */
-			NULL, /* Class Finalize */
-			NULL, /* Class Data */
-			sizeof(Part),
-			0, /* n_preallocs */
-			(GInstanceInitFunc)part_init, /* Instance init */
-			NULL
-		};
-		part_type = g_type_register_static(TYPE_ITEM_DATA,
-			"Part", &part_info, 0);
-	}
-
-	return part_type;
-}
-
 static void
-part_finalize(GObject *object)
+part_finalize (GObject *object)
 {
 	Part *part;
 	PartPriv *priv;
@@ -153,14 +153,13 @@ part_finalize(GObject *object)
 		g_free (priv);
 		part->priv = NULL;
 	}
-
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
 static void
-part_dispose(GObject *object)
+part_dispose (GObject *object)
 {
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS (parent_class)->dispose (object);
 }
 
 static void
@@ -169,21 +168,21 @@ part_class_init (PartClass *klass)
 	GObjectClass *object_class;
 	ItemDataClass *item_data_class;
 
-	parent_class = g_type_class_peek(TYPE_ITEM_DATA);
+	parent_class = g_type_class_peek (TYPE_ITEM_DATA);
 
-	object_class = G_OBJECT_CLASS(klass);
-	item_data_class = ITEM_DATA_CLASS(klass);
+	object_class = G_OBJECT_CLASS (klass);
+	item_data_class = ITEM_DATA_CLASS (klass);
 
 	object_class->set_property = part_set_gproperty;
 	object_class->get_property = part_get_gproperty;
 	object_class->dispose = part_dispose;
 	object_class->finalize = part_finalize;
 
-	g_object_class_install_property ( object_class,	ARG_PROPERTIES,
-		g_param_spec_pointer("properties", "properties",
+	g_object_class_install_property (object_class,	ARG_PROPERTIES,
+		g_param_spec_pointer ("properties", "properties",
 			"the properties", G_PARAM_READWRITE));
-	g_object_class_install_property(object_class, ARG_LABELS,
-		g_param_spec_pointer("labels", "labels", "the labels",
+	g_object_class_install_property (object_class, ARG_LABELS,
+		g_param_spec_pointer ("labels", "labels", "the labels",
 			G_PARAM_READWRITE));
 
 	item_data_class->clone = part_clone;
@@ -199,7 +198,7 @@ part_class_init (PartClass *klass)
 	item_data_class->print = part_print;
 
 	part_signals[CHANGED] =
-		g_signal_new ("changed", G_TYPE_FROM_CLASS(object_class),
+		g_signal_new ("changed", G_TYPE_FROM_CLASS (object_class),
 			G_SIGNAL_RUN_FIRST,
 			G_STRUCT_OFFSET (PartClass, changed),
 			NULL,
@@ -207,8 +206,6 @@ part_class_init (PartClass *klass)
 			g_cclosure_marshal_VOID__VOID,
 			G_TYPE_NONE,
 			0);
-
-// ?	g_object_class_add_signals (object_class, part_signals, LAST_SIGNAL);
 }
 
 static void
@@ -216,7 +213,7 @@ part_init (Part *part)
 {
 	PartPriv *priv;
 
-	priv = g_new0(PartPriv, 1);
+	priv = g_new0 (PartPriv, 1);
 
 	part->priv = priv;
 }
@@ -226,7 +223,7 @@ part_new (void)
 {
 	Part *part;
 
-	part = PART(g_object_new(TYPE_PART, NULL));
+	part = PART (g_object_new (TYPE_PART, NULL));
 
 	return part;
 }
@@ -241,33 +238,31 @@ part_new_from_library_part (LibraryPart *library_part)
 
 	g_return_val_if_fail (library_part != NULL, NULL);
 
-	part = part_new();
+	part = part_new ();
 	if (!part)
 		return NULL;
 
 	priv = part->priv;
 
 	symbol = library_get_symbol (library_part->symbol_name);
-	if (symbol ==  NULL){
-		g_warning ("Couldn't find the requested symbol %s for part %s in library.\n",
+	if (symbol ==  NULL) {
+		oregano_warning (g_strdup_printf (_("Couldn't find the requested symbol"
+		"%s for part %s in library.\n"),
 			library_part->symbol_name,
-			library_part->name);
+			library_part->name));
 		return NULL;
 	}
 
 	pins = symbol->connections;
 
-	if ( pins )
+	if (pins)
 		part_set_pins (part, pins);
 
-
-	g_object_set (
-		G_OBJECT (part),
+	g_object_set (G_OBJECT (part),
 		"Part::properties", library_part->properties,
 		"Part::labels", library_part->labels,
 		NULL);
 
-	/* FIXME: */
 	priv->name = g_strdup (library_part->name);
 	priv->symbol_name = g_strdup (library_part->symbol_name);
 	priv->library = library_part->library;
@@ -278,7 +273,7 @@ part_new_from_library_part (LibraryPart *library_part)
 }
 
 static void
-part_set_gproperty(GObject *object, guint prop_id, const GValue *value,
+part_set_gproperty (GObject *object, guint prop_id, const GValue *value,
 	GParamSpec *spec)
 {
 	GSList *list;
@@ -286,18 +281,18 @@ part_set_gproperty(GObject *object, guint prop_id, const GValue *value,
 
 	switch (prop_id) {
 	case ARG_PROPERTIES:
-		list = g_value_get_pointer(value);
+		list = g_value_get_pointer (value);
 		part_set_properties (part, list);
 		break;
 	case ARG_LABELS:
-		list = g_value_get_pointer(value);
+		list = g_value_get_pointer (value);
 		part_set_labels (part, list);
 		break;
 	}
 }
 
 static void
-part_get_gproperty(GObject *object, guint prop_id, GValue *value,
+part_get_gproperty (GObject *object, guint prop_id, GValue *value,
 	GParamSpec *spec)
 {
 	Part *part = PART (object);
@@ -305,10 +300,10 @@ part_get_gproperty(GObject *object, guint prop_id, GValue *value,
 
 	switch (prop_id) {
 	case ARG_LABELS:
-		g_value_set_pointer(value, priv->labels);
+		g_value_set_pointer (value, priv->labels);
 		break;
 	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID(part, prop_id, spec);
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (part, prop_id, spec);
 	}
 }
 
@@ -382,9 +377,7 @@ part_set_properties (Part *part, GSList *properties)
 	if (priv->properties != NULL)
 		g_warning ("Properties already set!");
 
-	/*
-	 * Copy the properties list to the part.
-	 */
+	// Copy the properties list to the part.
 	for (list = properties; list; list = list->next) {
 		PartProperty *prop_new, *prop;
 
@@ -427,7 +420,7 @@ part_get_property (Part *part, char *name)
 
 	for (props = priv->properties; props; props = props->next) {
 		prop = props->data;
-		if (g_strcasecmp (prop->name, name) == 0) {
+		if (g_ascii_strcasecmp (prop->name, name) == 0) {
 			return g_strdup (prop->value);
 		}
 	}
@@ -495,10 +488,8 @@ part_set_pins (Part *part, GSList *pins)
 	priv->num_pins = num_pins;
 
 	for (list = pins, i = 0; list; list = list->next, i++) {
-		/*
-		 * Note that this is slightly hackish. The list contains
-		 * Connections which only have the SheetPos field.
-		 */
+		// Note that this is slightly hackish. The list contains
+		// Connections which only have the SheetPos field.
 		Pin *pin = list->data;
 
 		priv->pins[i].pin_nr = i;
@@ -527,12 +518,13 @@ part_get_labels (Part *part)
 static void
 part_rotate (ItemData *data, int angle, SheetPos *center)
 {
-	double affine[6], dx, dy;
-	ArtPoint src, dst;
+	cairo_matrix_t affine;
+	double dx, dy, x, y;
 	Part *part;
 	PartPriv *priv;
 	int i, tot_rotation;
 	SheetPos b1, b2, part_center_before, part_center_after, delta;
+	SignalRotatedStruct *signal_struct;
 
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (IS_PART (data));
@@ -544,76 +536,97 @@ part_rotate (ItemData *data, int angle, SheetPos *center)
 
 	priv = part->priv;
 
-	tot_rotation = (priv->rotation + angle)%360;
+	tot_rotation = (priv->rotation + angle) % 360;
 	
 	priv->rotation = tot_rotation;
+	angle = tot_rotation;
 
-	art_affine_rotate (affine, angle);
+	cairo_matrix_init_rotate (&affine, (double) (angle* M_PI / 180));
 
-	/*
-	 * Rotate the pins.
-	 */
+	// Rotate the pins.
 	for (i = 0; i < priv->num_pins; i++) {
-		src.x = priv->pins[i].offset.x;
-		src.y = priv->pins[i].offset.y;
-		art_affine_point (&dst, &src, affine);
+		x = priv->pins[i].offset.x;
+		y = priv->pins[i].offset.y;
+		cairo_matrix_transform_point (&affine, &x, &y);
 
-		if (fabs (dst.x) < 1e-2)
-			dst.x = 0.0;
-		if (fabs (dst.y) < 1e-2)
-			dst.y = 0.0;
+		if (fabs (x) < 1e-2)
+			x = 0.0;
+		if (fabs (y) < 1e-2)
+			y = 0.0;
 
-		priv->pins[i].offset.x = dst.x;
-		priv->pins[i].offset.y = dst.y;
+		priv->pins[i].offset.x = x;
+		priv->pins[i].offset.y = y;
 	}
 
+	// Rotate the bounding box.
 	item_data_get_relative_bbox (ITEM_DATA (part), &b1, &b2);
-	part_center_before.x = b1.x + (b2.x - b1.x) / 2;
-	part_center_before.y = b1.y + (b2.y - b1.y) / 2;
+	part_center_before.x = (b1.x + b2.x) / 2;
+	part_center_before.y = (b1.y + b2.y) / 2;
 
-	/*
-	 * Rotate the bounding box.
-	 */
-	src.x = b1.x;
-	src.y = b1.y;
-	art_affine_point (&dst, &src, affine);
-	b1.x = dst.x;
-	b1.y = dst.y;
+	x = b1.x;
+	y = b1.y;
+	cairo_matrix_transform_point (&affine, &x, &y);
+	b1.x = x;
+	b1.y = y;
 
-	src.x = b2.x;
-	src.y = b2.y;
-	art_affine_point (&dst, &src, affine);
-	b2.x = dst.x;
-	b2.y = dst.y;
+	x = b2.x;
+	y = b2.y;
+	cairo_matrix_transform_point (&affine, &x, &y);
+	b2.x = x;
+	b2.y = y;
 
 	item_data_set_relative_bbox (ITEM_DATA (part), &b1, &b2);
 
 	if (center) {
 		SheetPos part_pos;
+		gfloat tmp_x, tmp_y;
 
-		part_center_after.x = b1.x + (b2.x - b1.x) / 2;
-		part_center_after.y = b1.y + (b2.y - b1.y) / 2;
+		part_center_after.x = (b1.x + b2.x) / 2;
+		part_center_after.y = (b1.y + b2.y) / 2;
 
 		dx = part_center_before.x - part_center_after.x;
 		dy = part_center_before.y - part_center_after.y;
 
 		item_data_get_pos (ITEM_DATA (part), &part_pos);
 
-		src.x = part_center_before.x - center->x + part_pos.x;
-		src.y = part_center_before.y - center->y + part_pos.y;
-		art_affine_point (&dst, &src, affine);
+		tmp_x = x = part_center_before.x - center->x + part_pos.x;
+		tmp_y = y = part_center_before.y - center->y + part_pos.y;
+		cairo_matrix_transform_point (&affine, &x, &y);
 
-		delta.x = dx - src.x + dst.x;
-		delta.y = dy - src.y + dst.y;
+		delta.x = dx + x - tmp_x;
+		delta.y = dy + y - tmp_y;
 
 		item_data_move (ITEM_DATA (part), &delta);
 	}
 	
-	/*
-	 * Let the views (canvas items) know about the rotation.
-	 */
-	g_signal_emit_by_name (G_OBJECT (part), "rotated", angle);
+	// Let the views (canvas items) know about the rotation.
+	signal_struct = g_new0 (SignalRotatedStruct, 1);
+	signal_struct->part = part;
+	g_timeout_add (10, 
+	               (gpointer) emit_rotated_signal_when_handler_connected, 
+	               (gpointer) signal_struct);
+}
 
+static gboolean
+emit_rotated_signal_when_handler_connected (gpointer data)
+{
+	gboolean handler_connected;
+	SignalRotatedStruct *signal_struct = (SignalRotatedStruct *) data;
+	int angle = 0;
+	Part *part;
+	
+
+	part = signal_struct->part;
+	angle = part->priv->rotation;
+
+	handler_connected = g_signal_handler_is_connected (G_OBJECT (part), 
+	                    	ITEM_DATA (part)->rotated_handler_id);
+	if (handler_connected) {
+		g_signal_emit_by_name (G_OBJECT (part), 
+		                       "rotated", angle);
+	}
+
+	return !handler_connected;
 }
 
 static void
@@ -621,12 +634,11 @@ part_flip (ItemData *data, gboolean horizontal, SheetPos *center)
 {
 	Part *part;
 	PartPriv *priv;
-	SheetPos b1, b2;
 	int i;
-	double affine[6];
-	ArtPoint src, dst;
-	SheetPos part_center_before, part_center_after;
-
+	cairo_matrix_t affine;
+	double x, y;
+	SignalFlippedStruct *signal_struct;
+	
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (IS_PART (data));
 
@@ -643,77 +655,100 @@ part_flip (ItemData *data, gboolean horizontal, SheetPos *center)
 		priv->flip = priv->flip & ~ID_FLIP_VERT;
 
 	if (horizontal)
-		art_affine_scale (affine, -1, 1);
+		cairo_matrix_init_scale (&affine, 1.0, -1.0);
 	else
-		art_affine_scale (affine, 1, -1);
-
-	/*
-	 * Flip the pins.
-	 */
-	item_data_get_relative_bbox (ITEM_DATA (part), &b1, &b2);
+		cairo_matrix_init_scale (&affine, -1.0, 1.0);
+	
+	//Flip the pins.
 	for (i = 0; i < priv->num_pins; i++) {
-		src.x = priv->pins[i].offset.x;
-		src.y = priv->pins[i].offset.y;
-		art_affine_point (&dst, &src, affine);
+		x = priv->pins[i].offset.x;
+		y = priv->pins[i].offset.y;
+		cairo_matrix_transform_point (&affine, &x, &y);
+		
+		if (fabs (x) < 1e-2)
+			x = 0.0;
+		if (fabs (y) < 1e-2)
+			y = 0.0;
 
-		if (fabs (dst.x) < 1e-2)
-			dst.x = 0;
-		if (fabs (dst.y) < 1e-2)
-			dst.y = 0;
-
-		priv->pins[i].offset.x = dst.x;
-		priv->pins[i].offset.y = dst.y;
+		priv->pins[i].offset.x = x;
+		priv->pins[i].offset.y = y;
 	}
 
-	/*
-	 * Tell the views.
-	 */
-	g_signal_emit_by_name (G_OBJECT (part), "flipped", horizontal);
+	// Tell the views.		
+	signal_struct = g_new0 (SignalFlippedStruct, 1);
+	signal_struct->part = part;
+	signal_struct->horizontal = horizontal;
+	signal_struct->center = center;
+	g_timeout_add (10,
+	               (gpointer) emit_flipped_signal_when_handler_connected, 
+	               (gpointer) signal_struct);
+}
 
-	if (center) {
-		item_data_get_relative_bbox (ITEM_DATA (part), &b1, &b2);
-		part_center_before.x = b1.x + (b2.x - b1.x) / 2;
-		part_center_before.y = b1.y + (b2.y - b1.y) / 2;
+static 
+gboolean emit_flipped_signal_when_handler_connected (gpointer data)
+{
+	gboolean handler_connected;
+	SignalFlippedStruct *signal_struct = (SignalFlippedStruct *) data;
+	gboolean horizontal;
+	SheetPos *center;
+	Part *part;
+	
+	SheetPos part_center_before = {0.0, 0.0}, part_center_after = {0.0, 0.0};
+	SheetPos b1, b2;
+	cairo_matrix_t affine;
+	double x, y;
+	
+
+	part = signal_struct->part;
+	horizontal = signal_struct->horizontal;
+	center = signal_struct->center;
+	
+	handler_connected = g_signal_handler_is_connected (G_OBJECT (part), 
+	                                                   ITEM_DATA(part)->flipped_handler_id);
+	if (handler_connected) {
+		g_signal_emit_by_name (G_OBJECT (part), 
+		                       "flipped", horizontal);
+
+		if (center) {
+			item_data_get_relative_bbox (ITEM_DATA (part), &b1, &b2);
+			part_center_before.x = (b1.x + b2.x) / 2;
+			part_center_before.y = (b1.y + b2.y) / 2;
+		}
+
+		// Flip the bounding box.
+		x = b1.x;
+    	y = b1.y;
+    	cairo_matrix_transform_point (&affine, &x, &y);
+    	b1.x = x;
+    	b1.y = y;
+
+		x = b2.x;
+    	y = b2.y;
+    	cairo_matrix_transform_point (&affine, &x, &y);
+    	b2.x = x;
+    	b2.y = y;
+			
+		item_data_set_relative_bbox (ITEM_DATA (part), &b1, &b2);
+
+		if (center) {
+			SheetPos part_pos, delta;
+			double dx, dy;
+
+			part_center_after.x = b1.x + (b2.x - b1.x) / 2;
+			part_center_after.y = b1.y + (b2.y - b1.y) / 2;
+
+			dx = part_center_before.x - part_center_after.x;
+			dy = part_center_before.y - part_center_after.y;
+
+			item_data_get_pos (ITEM_DATA (part), &part_pos);
+
+			delta.x = dx + part_pos.x;
+			delta.y = dy + part_pos.y;
+			item_data_move (ITEM_DATA (part), &delta);
+		}
 	}
 
-	/*
-	 * Flip the bounding box.
-	 */
-	src.x = b1.x;
-	src.y = b1.y;
-	art_affine_point (&dst, &src, affine);
-	b1.x = dst.x;
-	b1.y = dst.y;
-
-	src.x = b2.x;
-	src.y = b2.y;
-	art_affine_point (&dst, &src, affine);
-	b2.x = dst.x;
-	b2.y = dst.y;
-
-	item_data_set_relative_bbox (ITEM_DATA (part), &b1, &b2);
-
-	if (center) {
-		SheetPos part_pos, delta;
-		double dx, dy;
-
-		part_center_after.x = b1.x + (b2.x - b1.x) / 2;
-		part_center_after.y = b1.y + (b2.y - b1.y) / 2;
-
-		dx = part_center_before.x - part_center_after.x;
-		dy = part_center_before.y - part_center_after.y;
-
-		item_data_get_pos (ITEM_DATA (part), &part_pos);
-
-		src.x = part_center_before.x - center->x + part_pos.x;
-		src.y = part_center_before.y - center->y + part_pos.y;
-		art_affine_point (&dst, &src, affine);
-
-		delta.x = dx - src.x + dst.x;
-		delta.y = dy - src.y + dst.y;
-
-		item_data_move (ITEM_DATA (part), &delta);
-	}
+	return !handler_connected;
 }
 
 static ItemData *
@@ -730,7 +765,7 @@ part_clone (ItemData *src)
 		return NULL;
 
 	src_part = PART (src);
-	new_part = PART(g_object_new(TYPE_PART, NULL));
+	new_part = PART (g_object_new (TYPE_PART, NULL));
 	new_part->priv->pins = g_new0 (Pin, src_part->priv->num_pins);
 	id_class->copy (ITEM_DATA (new_part), src);
 
@@ -767,9 +802,7 @@ part_copy (ItemData *dest, ItemData *src)
 	for (i = 0; i < dest_part->priv->num_pins; i++)
 		dest_part->priv->pins[i].part = dest_part;
 
-	/*
-	 * Copy properties and labels.
-	 */
+	// Copy properties and labels.
 	dest_part->priv->properties =
 		g_slist_copy (src_part->priv->properties);
 	for (list = dest_part->priv->properties; list; list = list->next) {
@@ -801,7 +834,7 @@ part_update_bbox (Part *part)
 	GSList *objects;
 	LibrarySymbol *symbol;
 	SymbolObject *object;
-	GnomeCanvasPoints *points;
+	GooCanvasPoints *points;
 	int i;
 
 	SheetPos b1, b2;
@@ -815,9 +848,9 @@ part_update_bbox (Part *part)
 	b1.x = b1.y = b2.x = b2.y = 0.0;
 
 	for (objects = symbol->symbol_objects; objects;
-	     objects = objects->next){
+	     objects = objects->next) {
 		object = objects->data;
-		switch (object->type){
+		switch (object->type) {
 		case SYMBOL_OBJECT_LINE:
 			points = object->u.uline.line;
 
@@ -906,9 +939,7 @@ part_get_refdes_prefix (ItemData *data)
 	if (refdes == NULL)
 		return NULL;
 
-	 /*
-	 * Get the 'prefix' i.e R for resistors.
-	 */
+	// Get the 'prefix' i.e R for resistors.
 	length = strlen (refdes);
 	for (i = 0; i < length; i++) { 
 		if (isdigit (refdes[length-i -1])) {
@@ -937,7 +968,7 @@ part_set_property (ItemData *data, char *property, char *value)
 
 	for (props = priv->properties; props; props = props->next) {
 		prop = props->data;
-		if (g_strcasecmp (prop->name, property) == 0) {
+		if (g_ascii_strcasecmp (prop->name, property) == 0) {
 			g_free (prop->value);
 			if (value != NULL)
 				prop->value = g_strdup (value);
@@ -960,7 +991,7 @@ part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 	PartPriv *priv;
 	SheetPos pos;
 	IDFlip flip;
-	GnomeCanvasPoints *line;
+	GooCanvasPoints *line;
 
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (IS_PART (data));
@@ -996,7 +1027,8 @@ part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 
 	  cairo_rotate (cr, rotation*M_PI/180);
 	  cairo_translate (cr, -x0, -y0);
-	} else {
+	} 
+	else {
 	  flip = part_get_flip (part);
 	  if (flip) {
 	    cairo_translate (cr, x0, y0);	  
@@ -1005,7 +1037,7 @@ part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 	    if (!(flip & ID_FLIP_HORIZ) && (flip & ID_FLIP_VERT))
 	      cairo_scale (cr, 1, -1);
 	    if ((flip & ID_FLIP_HORIZ) && (flip & ID_FLIP_VERT))
-	      cairo_scale(cr,-1,-1);
+	      cairo_scale (cr,-1,-1);
 	    cairo_translate (cr, -x0, -y0);
 	  }
 	}
@@ -1058,9 +1090,7 @@ part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 		cairo_stroke (cr);
 	}
 
-	/* We don't want to rotate labels text, only the (x,y)
-	 * coordinate
-	 */
+	// We don't want to rotate labels text, only the (x,y) coordinate
 	gdk_cairo_set_source_color (cr, &ctx->colors.labels);
 	for (labels = part_get_labels (part); labels; labels = labels->next) {
 		gdouble x, y;
@@ -1095,5 +1125,3 @@ part_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 	}
 	cairo_restore (cr);
 }
-
-

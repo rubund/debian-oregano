@@ -1,8 +1,15 @@
 oreganodir = $(datadir)/oregano
+
+AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+	-DGTK_DISABLE_DEPRECATED \
+	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES \
+	-DGTK_DISABLE_SINGLE_INCLUDES
+
 INCLUDES =  						\
 	-DGNOMELOCALEDIR=\""$(datadir)/locale"\" 	\
 	-I$(includedir) $(GNOME_INCLUDEDIR)		\
-	-DOREGANO_GLADEDIR=\""$(oreganodir)/glade"\"	\
+	-DOREGANO_UIDIR=\""$(oreganodir)/xml"\"	\
 	-DOREGANO_LIBRARYDIR=\""$(oreganodir)/libraries"\" \
 	-DOREGANO_MODELDIR=\""$(oreganodir)/models"\" \
 	-DDATADIR=\""$(datadir)"\" \
@@ -31,5 +38,3 @@ libmodel_a_SOURCES = \
 	wire.h	\
 	wire-private.h	\
 	part-private.h
-#libmodel_a_LIBADD = @LIBMODEL_LIBADD@
-libmodel_a_LIBADD =  libmodel.a

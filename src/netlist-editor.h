@@ -4,10 +4,12 @@
  *
  * Author:
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 2004-2008 Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,9 +30,10 @@
 #ifndef __NETLIST_EDIT_H
 #define __NETLIST_EDIT_H
 
-#include <gconf/gconf-client.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <gtksourceview/gtksourceview.h>
+
 #include "schematic-view.h"
 #include "errors.h"
 #include "engine.h"
@@ -55,7 +58,7 @@ struct _NetlistEditor {
 struct _NetlistEditorClass {
 	GObjectClass parent_class;
 
-	/* Signals go here */
+	// Signals go here
 };
 
 GType netlist_editor_get_type (void);

@@ -1,13 +1,15 @@
 /*
- * ngspice.c
+ * ngspice.h
  *
  * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://oregano.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -25,10 +27,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NGSPICE_ENGINE
-#define __NGSPICE_ENGINE
+#ifndef __NGSPICE_H
+#define __NGSPICE_H
 
 #include <gtk/gtk.h>
+
 #include "engine.h"
 
 #define OREGANO_TYPE_NGSPICE             (oregano_ngspice_get_type ())
@@ -56,4 +59,3 @@ GType          oregano_ngspice_get_type (void);
 OreganoEngine *oregano_ngspice_new (Schematic *sm);
 
 #endif
-
