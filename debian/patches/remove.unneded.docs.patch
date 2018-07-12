@@ -1,0 +1,24 @@
+From: Maximiliano Curia <maxy@debian.org>
+Date: Sat, 7 Nov 2015 16:00:53 +0100
+Subject: remove.unneded.docs
+
+## Description: Remove unneeded documentation files
+## Origin/Author: Maximiliano Curia <maxy@debian.org>
+---
+ Makefile.am | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index ab9a5a8..eab1eac 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,9 +5,7 @@ SUBDIRS = po src data help
+ oreganodocdir = $(datadir)/doc/oregano
+ oreganodoc_DATA = \
+ 	README\
+-	COPYING\
+ 	AUTHORS\
+-	INSTALL\
+ 	NEWS\
+ 	TODO
+ 

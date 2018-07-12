@@ -1,0 +1,7 @@
+line.drawing.patch
+format-security.patch
+missing.potfiles.patch
+remove.unneded.docs.patch
+math-library.patch
+clang_FTBFS_Wreturn-type.patch
+0007-Update-russian-translation.patch

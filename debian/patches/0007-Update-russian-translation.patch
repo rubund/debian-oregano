@@ -1,0 +1,55 @@
+From: Maximiliano Curia <maxy@gnuservers.com.ar>
+Date: Sat, 7 Nov 2015 16:36:27 +0100
+Subject: Update russian translation
+
+---
+ po/ru.po | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/po/ru.po b/po/ru.po
+index b5a8c1b..2cb584d 100644
+--- a/po/ru.po
++++ b/po/ru.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: ru\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2006-09-11 02:36-0300\n"
+-"PO-Revision-Date: 2005-09-07 20:14+0400\n"
++"PO-Revision-Date: 2015-11-07 16:27+0100\n"
+ "Last-Translator: Yuri Kozlov <kozlov.y@gmail.com>\n"
+ "Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+ "MIME-Version: 1.0\n"
+@@ -296,11 +296,11 @@ msgstr "Настройки моделирования"
+ 
+ #: ../data/dialogs/sim-settings.glade2.h:16
+ msgid "Source"
+-msgstr "ц╘ц⌠ц■ц▐ц·ц▌ц┴ц▀"
++msgstr "Источник"
+ 
+ #: ../data/dialogs/sim-settings.glade2.h:17
+ msgid "Start"
+-msgstr "ц╨ц│ц░ц∙ц⌠ц▀"
++msgstr "Начало"
+ 
+ #: ../data/dialogs/sim-settings.glade2.h:18
+ msgid "Step"
+@@ -308,7 +308,7 @@ msgstr "Шаг"
+ 
+ #: ../data/dialogs/sim-settings.glade2.h:19
+ msgid "Stop"
+-msgstr "ц╞ц⌠ц■ц│ц▌ц▐ц≈ц▀ц│"
++msgstr "Стоп"
+ 
+ #: ../data/dialogs/sim-settings.glade2.h:20
+ msgid "Type"
+@@ -1041,9 +1041,8 @@ msgid "Unknown analysis"
+ msgstr "Неизвестный анализ"
+ 
+ #: ../src/engines/gnucap.c:693
+-#, fuzzy
+ msgid "abort"
+-msgstr "ц╨ц│ц░ц∙ц⌠ц▀"
++msgstr ""
+ 
+ #: ../src/engines/engine.c:32
+ msgid "Operating Point"

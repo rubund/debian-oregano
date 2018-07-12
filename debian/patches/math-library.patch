@@ -1,0 +1,18 @@
+From: Maximiliano Curia <maxy@debian.org>
+Date: Sat, 7 Nov 2015 16:00:53 +0100
+Subject: math-library
+
+---
+ src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 2222e14..5da4202 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -99,4 +99,4 @@ oregano_SOURCES = 	\
+ 	xml-helper.h
+ 
+ oregano_LDADD = \
+-	$(OREGANO_LIBS) 
++	$(OREGANO_LIBS) -lm

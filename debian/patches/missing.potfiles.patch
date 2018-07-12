@@ -1,0 +1,32 @@
+From: Maximiliano Curia <maxy@debian.org>
+Date: Sat, 7 Nov 2015 16:00:53 +0100
+Subject: missing.potfiles
+
+## Description: Adds missing files to POTFILES.in and POTFILES.skip
+## Origin/Author: Maximiliano Curia <maxy@debian.org>
+---
+ po/POTFILES.in   | 1 +
+ po/POTFILES.skip | 2 ++
+ 2 files changed, 3 insertions(+)
+ create mode 100644 po/POTFILES.skip
+
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index 7579bc0..ceaeebb 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -42,6 +42,7 @@ src/oregano-impl.c
+ src/oregano-config.c
+ src/engines/netlist.c
+ src/engines/gnucap.c
++src/engines/ngspice.c
+ src/engines/engine.c
+ src/netlist-editor.c
+ src/main.c
+diff --git a/po/POTFILES.skip b/po/POTFILES.skip
+new file mode 100644
+index 0000000..255ed53
+--- /dev/null
++++ b/po/POTFILES.skip
+@@ -0,0 +1,2 @@
++data/netlist.lang
++data/oregano.desktop.in
