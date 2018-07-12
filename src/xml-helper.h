@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
- *
+ * Web page: https://github.com/marc-lorber/oregano
+ * 
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,17 +32,12 @@
 #ifndef __XML_HELPER_H
 #define __XML_HELPER_H
 
-#include <gnome.h>
-#include "xml-compat.h"
+#include <glib.h>
 
-/*#include <gnome-xml/parser.h>*/
-/*#include <gnome-xml/parserInternals.h>*/
+#include "xml-compat.h"
 
 int oreganoXmlSAXParseFile (xmlSAXHandlerPtr sax,
 	gpointer user_data, const gchar *filename);
-
-void xmlSetGnomeCanvasPoints (xmlNodePtr node,
-	const char *name, GnomeCanvasPoints *val);
 
 void xmlSetValue (xmlNodePtr node, const char *name, const char *val);
 

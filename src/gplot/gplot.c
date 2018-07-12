@@ -3,9 +3,13 @@
  *
  * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,13 +28,15 @@
  */
 
 #include <math.h>
+
+#include "gplot-internal.h"
 #include "gplot.h"
 
 #define BORDER_SIZE 50
 
 static void g_plot_class_init (GPlotClass* class);
 static void g_plot_init (GPlot* plot);
-static gint g_plot_expose (GtkWidget* widget, GdkEventExpose* event);
+static gboolean g_plot_draw (GtkWidget* widget, cairo_t *cr);
 static cairo_t* g_plot_create_cairo (GPlot *);
 static gboolean g_plot_motion_cb (GtkWidget *, GdkEventMotion *, GPlot *);
 static gboolean g_plot_button_press_cb (GtkWidget *, GdkEventButton *, GPlot *);
@@ -72,7 +78,7 @@ struct _GPlotPriv {
 	gdouble last_x;
 	gdouble last_y;
 
-	/* Window->Viewport * Transformation Matrix */
+	// Window->Viewport * Transformation Matrix
 	cairo_matrix_t matrix;
 
 	gboolean window_valid;
@@ -106,7 +112,7 @@ g_plot_get_type ()
 }
 
 static void
-g_plot_class_init (GPlotClass* class)
+g_plot_class_init (GPlotClass* class) 
 {
 	GObjectClass* object_class;
 	GtkWidgetClass* widget_class;
@@ -115,7 +121,7 @@ g_plot_class_init (GPlotClass* class)
 	widget_class = GTK_WIDGET_CLASS (class);
 	parent_class = g_type_class_peek_parent (class);
 
-	widget_class->expose_event = g_plot_expose;
+	widget_class->draw = g_plot_draw;
 
 	object_class->dispose = g_plot_dispose;
 	object_class->finalize = g_plot_finalize;
@@ -126,7 +132,7 @@ g_plot_create_cairo (GPlot *p)
 {
 	cairo_t *cr;
 
-	cr = gdk_cairo_create (GTK_LAYOUT (p)->bin_window);
+	cr = gdk_cairo_create (gtk_layout_get_bin_window (GTK_LAYOUT (p)));
 
 	return cr;
 }
@@ -161,6 +167,7 @@ g_plot_dispose (GObject *object)
 	}
 	g_list_free (plot->priv->functions);
 	plot->priv->functions = NULL;
+	g_list_free_full (lst, g_object_unref);
 
 	G_OBJECT_CLASS (parent_class)->dispose (object);
 }
@@ -168,7 +175,7 @@ g_plot_dispose (GObject *object)
 static int
 get_best_exponent (int div)
 {
-	/* http://en.wikipedia.org/wiki/Micro */
+	// http://en.wikipedia.org/wiki/Micro
 	switch (div) {
 		case -24:
 		case -21:
@@ -197,7 +204,8 @@ get_best_exponent (int div)
 }
 
 void
-draw_axis (cairo_t *cr, GPlotFunctionBBox *bbox, gdouble min, gdouble max, gboolean vertical, gint *div)
+draw_axis (cairo_t *cr, GPlotFunctionBBox *bbox, gdouble min, gdouble max, 
+           gboolean vertical, gint *div)
 {
 	gchar *label;
 	cairo_text_extents_t extents;
@@ -221,7 +229,8 @@ draw_axis (cairo_t *cr, GPlotFunctionBBox *bbox, gdouble min, gdouble max, gbool
 	else
 		s = (bbox->xmax - bbox->xmin) / 10.0;
 
-	for (i = (vertical?bbox->ymin:bbox->xmin), j = max; i <= (vertical?bbox->ymax:bbox->xmax) + 0.5; i += s, j -= step) {
+	for (i = (vertical?bbox->ymin:bbox->xmin), j = max; 
+	     i <= (vertical?bbox->ymax:bbox->xmax) + 0.5; i += s, j -= step) {
 		label = g_strdup_printf ("%.2f", j / divisor);
 		cairo_text_extents (cr, label, &extents);
 
@@ -232,7 +241,8 @@ draw_axis (cairo_t *cr, GPlotFunctionBBox *bbox, gdouble min, gdouble max, gbool
 			y2 = i;
 			x3 = bbox->xmin - extents.width * 1.5;
 			y3 = i + extents.height / 2.0;
-		} else {
+		} 
+		else {
 			x1 = i;
 			y1 = bbox->ymax - 4;
 			x2 = i;
@@ -253,7 +263,7 @@ draw_axis (cairo_t *cr, GPlotFunctionBBox *bbox, gdouble min, gdouble max, gbool
 static gchar*
 get_unit_text (int div)
 {
-	/* http://en.wikipedia.org/wiki/Micro */
+	// http://en.wikipedia.org/wiki/Micro
 	switch (div) {
 		case -24: return g_strdup ("y");
 		case -21: return g_strdup ("z");
@@ -277,29 +287,27 @@ get_unit_text (int div)
 	return g_strdup_printf ("10e%02d", div);
 }
 
-static gint 
-g_plot_expose (GtkWidget* widget, GdkEventExpose* event)
+static gboolean 
+g_plot_draw (GtkWidget* widget, cairo_t *cr)
 {
-	static double dashes[] = {3,  /* ink */
-		3,  /* skip */
-		3,  /* ink */
-		3   /* skip*/ };
-	static int ndash  = sizeof (dashes)/sizeof(dashes[0]);
+	static double dashes[] = 
+	   {3,  // ink
+		3,  // skip
+		3,  // ink
+		3}; // skip
+	static int ndash  = sizeof (dashes) / sizeof (dashes[0]);
 	static double offset = -0.2;
 
 	GPlot *plot;
 	GPlotPriv *priv;
-	cairo_t* cr;
 	guint width;
 	guint height;
 	guint graph_width;
 	guint graph_height;
 	GPlotFunction *f;
 	GList *lst;
-	GPlotFunctionBBox bbox;
 	gdouble aX, bX, aY, bY;
 	gint div;
-	int i = 0;
 	cairo_text_extents_t extents;
 
 	plot = GPLOT (widget);
@@ -309,49 +317,38 @@ g_plot_expose (GtkWidget* widget, GdkEventExpose* event)
 		g_plot_update_bbox (plot);
 	}
 
-	width = widget->allocation.width;
-	height = widget->allocation.height;
+	width = gtk_widget_get_allocated_width (widget);
+	height = gtk_widget_get_allocated_height (widget);
 
 	graph_width = width - priv->left_border - priv->right_border;
 	graph_height = height - priv->top_border - priv->bottom_border;
 
-	cr = g_plot_create_cairo (plot);
-
-	/* Set a clip region for the expose event */
-	/* TODO :This is useful if we use gtk_widget_queue_draw_area */
-	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
-	cairo_clip (cr);
-
-	/* Paint background */
+	// Paint background
 	cairo_save (cr);
 		cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 		cairo_rectangle (cr, 0, 0, width, height);
 		cairo_fill (cr);
 	cairo_restore (cr);
 
-	/* Plot Border */
+	// Plot Border
 	cairo_save (cr);
 		cairo_set_line_width (cr, 0.5);
 		cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
 		cairo_rectangle (cr, priv->left_border, priv->right_border, graph_width, graph_height);
 		cairo_stroke (cr);
 	cairo_restore (cr);
-
-	/* TODO : Move this to SizeAllocation functions */
-	priv->viewport_bbox.xmax = widget->allocation.width - priv->right_border;
+	
+	priv->viewport_bbox.xmax = width - priv->right_border;
 	priv->viewport_bbox.xmin = priv->left_border;
-	priv->viewport_bbox.ymax = widget->allocation.height - priv->bottom_border;
+	priv->viewport_bbox.ymax = height - priv->bottom_border;
 	priv->viewport_bbox.ymin = priv->top_border;
 
-	/* Save real bbox */
-	bbox = priv->window_bbox;
-
-	/* Calculating Window to Viewport matrix */
-	aX = (priv->viewport_bbox.xmax - priv->viewport_bbox.xmin)
-		/ (priv->window_bbox.xmax - priv->window_bbox.xmin);
+	// Calculating Window to Viewport matrix
+	aX = (priv->viewport_bbox.xmax - priv->viewport_bbox.xmin) /
+		 (priv->window_bbox.xmax - priv->window_bbox.xmin);
 	bX = -aX * priv->window_bbox.xmin + priv->viewport_bbox.xmin;
-	aY = (priv->viewport_bbox.ymax - priv->viewport_bbox.ymin)
-		/ (priv->window_bbox.ymin - priv->window_bbox.ymax);
+	aY = (priv->viewport_bbox.ymax - priv->viewport_bbox.ymin) /
+		 (priv->window_bbox.ymin - priv->window_bbox.ymax);
 	bY = -aY * priv->window_bbox.ymax + priv->viewport_bbox.ymin;
 
 	cairo_matrix_init (&priv->matrix, aX, 0, 0, aY, bX, bY);
@@ -397,7 +394,6 @@ g_plot_expose (GtkWidget* widget, GdkEventExpose* event)
 	cairo_restore (cr);
 
 	cairo_save (cr);
-		i = 0;
 		cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
 		cairo_set_line_width (cr, 1);
 
@@ -417,7 +413,7 @@ g_plot_expose (GtkWidget* widget, GdkEventExpose* event)
 			priv->xlabel_unit = get_unit_text (div);
 	cairo_restore (cr);
 
-	/* Axis Labels */
+	// Axis Labels
 	if (priv->xlabel) {
 		char *txt;
 		if (priv->xlabel_unit == NULL)
@@ -470,8 +466,7 @@ g_plot_expose (GtkWidget* widget, GdkEventExpose* event)
 			cairo_stroke (cr);
 		cairo_restore (cr);
 	}
-
-	cairo_destroy (cr);
+	g_list_free_full (lst, g_object_unref);
 
 	return FALSE;
 }
@@ -510,9 +505,12 @@ g_plot_new ()
 		GDK_BUTTON1_MOTION_MASK|GDK_BUTTON2_MOTION_MASK|
 		GDK_BUTTON3_MOTION_MASK);
 
-	g_signal_connect (G_OBJECT (plot), "motion-notify-event", G_CALLBACK(g_plot_motion_cb), plot);
-	g_signal_connect (G_OBJECT (plot), "button-press-event", G_CALLBACK(g_plot_button_press_cb), plot);
-	g_signal_connect (G_OBJECT (plot), "button-release-event", G_CALLBACK(g_plot_button_release_cb), plot);
+	g_signal_connect (G_OBJECT (plot), "motion-notify-event", 
+	                  G_CALLBACK (g_plot_motion_cb), plot);
+	g_signal_connect (G_OBJECT (plot), "button-press-event", 
+	                  G_CALLBACK (g_plot_button_press_cb), plot);
+	g_signal_connect (G_OBJECT (plot), "button-release-event", 
+	                  G_CALLBACK (g_plot_button_release_cb), plot);
 
 	return GTK_WIDGET (plot);
 }
@@ -536,8 +534,7 @@ g_plot_motion_cb (GtkWidget *w, GdkEventMotion *e, GPlot *p)
 				gdouble dx, dy;
 				cairo_matrix_t t = p->priv->matrix;
 				GdkCursor *cursor = gdk_cursor_new (GDK_FLEUR);
-				gdk_window_set_cursor (w->window, cursor);
-				gdk_cursor_destroy (cursor);
+				gdk_window_set_cursor (gtk_widget_get_window (w), cursor);
 				gdk_flush ();
 
 				dx = p->priv->last_x - e->x;
@@ -561,8 +558,7 @@ g_plot_motion_cb (GtkWidget *w, GdkEventMotion *e, GPlot *p)
 			if ((p->priv->action == ACTION_STARTING_REGION) || (p->priv->action == ACTION_REGION)) {
 				gdouble dx, dy;
 				GdkCursor *cursor = gdk_cursor_new (GDK_CROSS);
-				gdk_window_set_cursor (w->window, cursor);
-				gdk_cursor_destroy (cursor);
+				gdk_window_set_cursor (gtk_widget_get_window (w), cursor);
 				gdk_flush ();
 
 				/* dx < 0 == moving to the left */
@@ -571,12 +567,14 @@ g_plot_motion_cb (GtkWidget *w, GdkEventMotion *e, GPlot *p)
 
 				if (dx < 0) {
 					p->priv->rubberband.xmin = e->x;
-				} else {
+				} 
+				else {
 					p->priv->rubberband.xmax = e->x;
 				}
 				if (dy < 0) {
 					p->priv->rubberband.ymin = e->y;
-				} else {
+				} 
+				else {
 					p->priv->rubberband.ymax = e->y;
 				}
 
@@ -594,8 +592,9 @@ g_plot_button_press_cb (GtkWidget *w, GdkEventButton *e, GPlot *p)
 	g_return_val_if_fail (IS_GPLOT (p), TRUE);
 
 	if (e->type == GDK_2BUTTON_PRESS) {
-		/* TODO : Chekck function below cursor and open a property dialog :) */
-	} else {
+		/* TODO : Check function below cursor and open a property dialog :) */
+	} 
+	else {
 		switch (p->priv->zoom_mode) {
 			case GPLOT_ZOOM_INOUT:
 				if (e->button == 1) {
@@ -623,7 +622,7 @@ g_plot_button_press_cb (GtkWidget *w, GdkEventButton *e, GPlot *p)
 static gboolean
 g_plot_button_release_cb (GtkWidget *w, GdkEventButton *e, GPlot *p)
 {
-	gdouble zoom;
+	gdouble zoom = 0.0;
 
 	g_return_val_if_fail (IS_GPLOT (p), TRUE);
 
@@ -644,14 +643,15 @@ g_plot_button_release_cb (GtkWidget *w, GdkEventButton *e, GPlot *p)
 				p->priv->window_bbox.ymin /= zoom;
 				p->priv->window_bbox.ymax /= zoom;
 				gtk_widget_queue_draw (w);
-			} else {
-				gdk_window_set_cursor (w->window, NULL);
+			} 
+			else {
+				gdk_window_set_cursor (gtk_widget_get_window (w), NULL);
 				gdk_flush ();
 			}
 		break;
 		case GPLOT_ZOOM_REGION:
 			if ((e->button == 1) && (p->priv->action == ACTION_REGION)) {
-				gdk_window_set_cursor (w->window, NULL);
+				gdk_window_set_cursor (gtk_widget_get_window (w), NULL);
 				gdk_flush ();
 				{
 					gdouble x1, y1, x2, y2;
@@ -671,8 +671,9 @@ g_plot_button_release_cb (GtkWidget *w, GdkEventButton *e, GPlot *p)
 					p->priv->window_bbox.ymin = y2;
 					p->priv->window_bbox.ymax = y1;
 				}
-			} else if (e->button == 3) {
-				gdk_window_set_cursor (w->window, NULL);
+			} 
+			else if (e->button == 3) {
+				gdk_window_set_cursor (gtk_widget_get_window (w), NULL);
 				gdk_flush ();
 			}
 			gtk_widget_queue_draw (w);
@@ -708,7 +709,7 @@ g_plot_update_bbox (GPlot *p)
 
 	priv = p->priv;
 
-	/* Get functions bbox */
+	// Get functions bbox
 	priv->window_bbox.xmax = -9999999;
 	priv->window_bbox.xmin = 9999999;
 	priv->window_bbox.ymax = -9999999;
@@ -723,6 +724,7 @@ g_plot_update_bbox (GPlot *p)
 		priv->window_bbox.ymin = MIN (priv->window_bbox.ymin, bbox.ymin);
 		lst = lst->next;
 	}
+	g_list_free_full (lst, g_object_unref);
 
 	if (priv->window_bbox.xmin == priv->window_bbox.xmax)
 		priv->window_bbox.xmax += 1;
@@ -762,7 +764,8 @@ g_plot_set_axis_labels (GPlot *p, gchar *x, gchar *y)
 
 		p->priv->xlabel = g_strdup (x);
 		p->priv->bottom_border = BORDER_SIZE + extents.height;
-	} else {
+	} 
+	else {
 		p->priv->bottom_border = BORDER_SIZE;
 		if (p->priv->xlabel) {
 			g_free (p->priv->xlabel);
@@ -781,7 +784,8 @@ g_plot_set_axis_labels (GPlot *p, gchar *x, gchar *y)
 		p->priv->left_border = BORDER_SIZE + extents.height;
 
 		p->priv->ylabel = g_strdup (y);
-	} else {
+	} 
+	else {
 		p->priv->left_border = BORDER_SIZE;
 		if (p->priv->ylabel) {
 			g_free (p->priv->ylabel);
@@ -807,6 +811,7 @@ g_plot_clear (GPlot *plot)
 	g_list_free (plot->priv->functions);
 	plot->priv->functions = NULL;
 	plot->priv->window_valid = FALSE;
+	g_list_free (lst);
 }
 
 void
@@ -835,5 +840,3 @@ get_order_of_magnitude (gdouble val, gdouble *man, gdouble *pw)
 	*man = val / sx;
 	*pw  = b;
 }
-
-

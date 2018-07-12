@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,10 +29,11 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 #include <glib.h>
-#include "main.h"
+
+#include "oregano.h"
 #include "sheet-item.h"
-#include "item-data.h"
 #include "clipboard.h"
 
 struct _ClipboardData {
@@ -91,18 +94,14 @@ clipboard_add_object (GObject *item)
 
 	g_return_if_fail (item != NULL);
 
-	/* TODO: FIX sheet global access */
-	g_return_if_fail (IS_SHEET_ITEM (item));
-
 	item_data = sheet_item_get_data (SHEET_ITEM (item));
+	g_return_if_fail (item_data != NULL);
 
 	id_class = ITEM_DATA_CLASS (G_OBJECT_GET_CLASS (item_data));
 	if (id_class->clone == NULL)
 		return;
 
-	/*
-	 * Duplicate the data for the object and add to the clipboard.
-	 */
+	// Duplicate the data for the object and add to the clipboard.
 	clone = id_class->clone (item_data);
 
 	cb_data = g_new0 (ClipboardData, 1);
@@ -127,4 +126,3 @@ clipboard_data_get_item_class (ClipboardData *data)
 
 	return G_OBJECT_CLASS (data->item_class);
 }
-

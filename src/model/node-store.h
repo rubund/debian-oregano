@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,6 +34,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+
 #include "sheet-pos.h"
 
 #define TYPE_NODE_STORE			  node_store_get_type ()
@@ -43,6 +46,7 @@
 
 typedef struct _NodeStore NodeStore;
 typedef struct _NodeStoreClass NodeStoreClass;
+typedef struct _NodeRect NodeRect;
 
 #include "schematic-print-context.h"
 #include "node.h"
@@ -64,36 +68,40 @@ struct _NodeStoreClass
 {
 	GObjectClass parent_class;
 
-	/* signals */
+	// signals
 
-	void (*dot_added) (NodeStore*);
-	void (*dot_removed) (NodeStore*);
+	void (*node_dot_added) 		(NodeStore*);
+	void (*node_dot_removed) 	(NodeStore*);
 };
 
-GType  node_store_get_type (void);
+struct _NodeRect
+{
+	double x0, y0, x1, y1;
+};
+
+GType        node_store_get_type (void);
 NodeStore	*node_store_new (void);
 Node		*node_store_get_node (NodeStore *store, SheetPos pos);
-int		 node_store_add_part (NodeStore *store, Part *part);
-int		 node_store_remove_part (NodeStore *store, Part *part);
-int		 node_store_add_wire (NodeStore *store, Wire *wire);
-int		 node_store_remove_wire (NodeStore *store, Wire *wire);
-int    node_store_add_textbox (NodeStore *self, Textbox *text);
-int    node_store_remove_textbox (NodeStore *self, Textbox *text);
-void	 node_store_node_foreach (NodeStore *store, GHFunc *func,
-	gpointer user_data);
-int		 node_store_is_wire_at_pos (NodeStore *store, SheetPos pos);
-int    node_store_is_pin_at_pos (NodeStore *store, SheetPos pos);
-GList	*node_store_get_parts (NodeStore *store);
-GList	*node_store_get_wires (NodeStore *store);
-GList	*node_store_get_items (NodeStore *store);
-GList	*node_store_get_node_positions (NodeStore *store);
-GList	*node_store_get_nodes (NodeStore *store);
-void	 node_store_dump_wires (NodeStore *store);
-void	 node_store_get_bounds (NodeStore *store, ArtDRect *rect);
-gint	 node_store_count_items (NodeStore *store, ArtDRect *rect);
-void	 node_store_print_items (NodeStore *store, cairo_t *opc, SchematicPrintContext *ctx);
-void	 node_store_print_labels (NodeStore *store,
-	cairo_t *opc, ArtDRect *rect);
-Node	 *node_store_get_or_create_node (NodeStore *store, SheetPos pos);
+int		     node_store_add_part (NodeStore *store, Part *part);
+int		     node_store_remove_part (NodeStore *store, Part *part);
+int		     node_store_add_wire (NodeStore *store, Wire *wire);
+int		     node_store_remove_wire (NodeStore *store, Wire *wire);
+int          node_store_add_textbox (NodeStore *self, Textbox *text);
+int          node_store_remove_textbox (NodeStore *self, Textbox *text);
+void	     node_store_node_foreach (NodeStore *store, GHFunc *func,
+					gpointer user_data);
+int		     node_store_is_wire_at_pos (NodeStore *store, SheetPos pos);
+int          node_store_is_pin_at_pos (NodeStore *store, SheetPos pos);
+GList	    *node_store_get_parts (NodeStore *store);
+GList	    *node_store_get_wires (NodeStore *store);
+GList	    *node_store_get_items (NodeStore *store);
+GList	    *node_store_get_node_positions (NodeStore *store);
+GList	    *node_store_get_nodes (NodeStore *store);
+void	     node_store_dump_wires (NodeStore *store);
+void	     node_store_get_bounds (NodeStore *store, NodeRect *rect);
+gint	     node_store_count_items (NodeStore *store, NodeRect *rect);
+void	     node_store_print_items (NodeStore *store, cairo_t *opc, 
+    				SchematicPrintContext *ctx);
+Node	    *node_store_get_or_create_node (NodeStore *store, SheetPos pos);
 
 #endif

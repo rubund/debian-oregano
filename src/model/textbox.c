@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,22 +30,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <gnome.h>
 #include <math.h>
-#include "item-data.h"
+#include <goocanvas.h>
+
 #include "textbox.h"
 #include "clipboard.h"
 #include "node-store.h"
 #include "schematic-print-context.h"
 
-/*
-#define TEXTBOX_DEFAULT_FONT "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
-*/
 #define TEXTBOX_DEFAULT_FONT "Arial 10"
 
-/*
- * Private declarations
- */
+// Private declarations
 
 static void textbox_class_init (TextboxClass *klass);
 static void textbox_init (Textbox *textbox);
@@ -65,55 +62,31 @@ enum {
 	LAST_SIGNAL
 };
 
-static ItemDataClass *parent_class = NULL;
-static guint textbox_signals[LAST_SIGNAL] = { 0 };
-
 struct _TextboxPriv {
 	char *text;
 	char *font;
 };
 
-GType
-textbox_get_type (void)
-{
-	static GType textbox_type = 0;
+G_DEFINE_TYPE (Textbox, textbox, TYPE_ITEM_DATA)
 
-	if (!textbox_type) {
-		static const GTypeInfo textbox_info = {
-			sizeof (TextboxClass),
-			NULL,
-			NULL,
-			(GClassInitFunc) textbox_class_init,
-			NULL,
-			NULL,
-			sizeof (Textbox),
-			0,
-			(GInstanceInitFunc) textbox_init,
-			NULL
-		};
+static guint textbox_signals[LAST_SIGNAL] = { 0 };
 
-		textbox_type = g_type_register_static(TYPE_ITEM_DATA,
-			"Textbox", &textbox_info, 0);
-	}
-
-	return textbox_type;
-}
 
 static void
-textbox_finalize(GObject *object)
+textbox_finalize (GObject *object)
 {
 	Textbox *textbox = TEXTBOX (object);
 	TextboxPriv *priv = textbox->priv;
 
 	g_free (priv);
 
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS (textbox_parent_class)->finalize (object);
 }
 
 static void
-textbox_dispose(GObject *object)
+textbox_dispose (GObject *object)
 {
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS (textbox_parent_class)->dispose (object);
 }
 
 static void
@@ -122,13 +95,13 @@ textbox_class_init (TextboxClass *klass)
 	GObjectClass *object_class;
 	ItemDataClass *item_data_class;
 
-	parent_class = g_type_class_peek(TYPE_ITEM_DATA);
-	item_data_class = ITEM_DATA_CLASS(klass);
-	object_class = G_OBJECT_CLASS(klass);
+	textbox_parent_class = g_type_class_peek (TYPE_ITEM_DATA);
+	item_data_class = ITEM_DATA_CLASS (klass);
+	object_class = G_OBJECT_CLASS (klass);
 
 	textbox_signals[TEXT_CHANGED] =
 		g_signal_new ("text_changed",
-			G_TYPE_FROM_CLASS(object_class),
+			G_TYPE_FROM_CLASS (object_class),
 			G_SIGNAL_RUN_FIRST,
 			0,
 			NULL,
@@ -138,7 +111,7 @@ textbox_class_init (TextboxClass *klass)
 
 	textbox_signals[FONT_CHANGED] =
 		g_signal_new ("font_changed",
-			G_TYPE_FROM_CLASS(object_class),
+			G_TYPE_FROM_CLASS (object_class),
 			G_SIGNAL_RUN_FIRST,
 			0,
 			NULL,
@@ -171,7 +144,7 @@ textbox_new (char *font)
 {
 	Textbox *textbox;
 
-	textbox = TEXTBOX(g_object_new(TYPE_TEXTBOX, NULL));
+	textbox = TEXTBOX (g_object_new (TYPE_TEXTBOX, NULL));
 
 	if (font == NULL)
 		textbox->priv->font = g_strdup (TEXTBOX_DEFAULT_FONT);
@@ -184,18 +157,17 @@ textbox_new (char *font)
 static ItemData *
 textbox_clone (ItemData *src)
 {
-	Textbox *src_textbox, *new_textbox;
+	Textbox *new_textbox;
 	ItemDataClass *id_class;
 
 	g_return_val_if_fail (src != NULL, NULL);
 	g_return_val_if_fail (IS_TEXTBOX (src), NULL);
 
-	id_class = ITEM_DATA_CLASS(G_OBJECT_GET_CLASS(src));
+	id_class = ITEM_DATA_CLASS (G_OBJECT_GET_CLASS(src));
 	if (id_class->copy == NULL)
 		return NULL;
 
-	src_textbox = TEXTBOX(src);
-	new_textbox = TEXTBOX(g_object_new(TYPE_TEXTBOX, NULL));
+	new_textbox = TEXTBOX (g_object_new (TYPE_TEXTBOX, NULL));
 	id_class->copy (ITEM_DATA (new_textbox), src);
 
 	return ITEM_DATA (new_textbox);
@@ -211,8 +183,8 @@ textbox_copy (ItemData *dest, ItemData *src)
 	g_return_if_fail (src != NULL);
 	g_return_if_fail (IS_TEXTBOX (src));
 
-	if (parent_class->copy != NULL)
-		parent_class->copy (dest, src);
+	if (ITEM_DATA_CLASS (textbox_parent_class)->copy != NULL)
+		ITEM_DATA_CLASS (textbox_parent_class)->copy (dest, src);
 
 	dest_textbox = TEXTBOX (dest);
 	src_textbox = TEXTBOX (src);
@@ -224,10 +196,9 @@ textbox_copy (ItemData *dest, ItemData *src)
 static void
 textbox_rotate (ItemData *data, int angle, SheetPos *center)
 {
-	double affine[6];
-	ArtPoint src, dst;
+	cairo_matrix_t affine;
+	double x, y;
 	Textbox *textbox;
-	TextboxPriv *priv;
 	SheetPos b1, b2;
 	SheetPos textbox_center, delta;
 
@@ -245,26 +216,22 @@ textbox_rotate (ItemData *data, int angle, SheetPos *center)
 		textbox_center.y = b1.y + (b2.y - b1.y) / 2;
 	}
 
-	priv = textbox->priv;
+	cairo_matrix_init_rotate (&affine, (double) angle * M_PI / 180);
 
-	art_affine_rotate (affine, angle);
-
-	/*
-	 * Let the views (canvas items) know about the rotation.
-	 */
-	g_signal_emit_by_name(G_OBJECT(textbox), "rotated", angle);
+	// Let the views (canvas items) know about the rotation.
+	g_signal_emit_by_name (G_OBJECT (textbox), "rotated", angle);
 
 	if (center) {
 		SheetPos textbox_pos;
 
 		item_data_get_pos (ITEM_DATA (textbox), &textbox_pos);
 
-		src.x = textbox_center.x - center->x;
-		src.y = textbox_center.y - center->y;
-		art_affine_point (&dst, &src, affine);
+		x = textbox_center.x - center->x;
+		y = textbox_center.y - center->y;
+		cairo_matrix_transform_point (&affine, &x, &y);
 
-		delta.x = -src.x + dst.x;
-		delta.y = -src.y + dst.y;
+		delta.x = x - (textbox_center.x - center->x);
+		delta.y = y - (textbox_center.y - center->y);
 
 		item_data_move (ITEM_DATA (textbox), &delta);
 	}
@@ -273,12 +240,11 @@ textbox_rotate (ItemData *data, int angle, SheetPos *center)
 static void
 textbox_flip (ItemData *data, gboolean horizontal, SheetPos *center)
 {
-	double affine[6];
-	ArtPoint src, dst;
+	cairo_matrix_t affine;
+	double x, y;
 	Textbox *textbox;
-	TextboxPriv *priv;
 	SheetPos b1, b2;
-	SheetPos textbox_center, delta;
+	SheetPos textbox_center = {0.0, 0.0}, delta;
 
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (IS_TEXTBOX (data));
@@ -291,69 +257,40 @@ textbox_flip (ItemData *data, gboolean horizontal, SheetPos *center)
 		textbox_center.y = b1.y + (b2.y - b1.y) / 2;
 	}
 
-	priv = textbox->priv;
-
 	if (horizontal)
-		art_affine_scale (affine, -1, 1);
+		cairo_matrix_init_scale (&affine, -1, 1);
 	else
-		art_affine_scale (affine, 1, -1);
+		cairo_matrix_init_scale (&affine, 1, -1);
 
-	/*
-	 * Let the views (canvas items) know about the rotation.
-	 */
-	g_signal_emit_by_name(G_OBJECT (textbox), "flipped", horizontal);
+	// Let the views (canvas items) know about the rotation.
+	g_signal_emit_by_name (G_OBJECT (textbox), "flipped", horizontal);
 
 	if (center) {
 		SheetPos textbox_pos;
 
 		item_data_get_pos (ITEM_DATA (textbox), &textbox_pos);
 
-		src.x = textbox_center.x - center->x;
-		src.y = textbox_center.y - center->y;
-		art_affine_point (&dst, &src, affine);
+		x = textbox_center.x - center->x;
+		y = textbox_center.y - center->y;
+		cairo_matrix_transform_point (&affine, &x, &y);
 
-		delta.x = -src.x + dst.x;
-		delta.y = -src.y + dst.y;
+		delta.x = x - (textbox_center.x - center->x);
+		delta.y = y - (textbox_center.y - center->y);
 
 		item_data_move (ITEM_DATA (textbox), &delta);
 	}
 }
 
-/* static */
 void
 textbox_update_bbox (Textbox *textbox)
 {
-	PangoFontDescription *font;
-	/*
-	Unused variables
-	int width;
-	int rbearing;
-	int lbearing;
-	int ascent, descent;
-	*/
 	SheetPos b1, b2;
-	TextboxPriv *priv;
-
-	priv = textbox->priv;
-
-	font = pango_font_description_from_string(priv->font);
-	/* TODO : Find out how to do this with Pango. */
-	/* gdk_string_extents (font,
-		priv->text,
-		&lbearing,
-		&rbearing,
-		&width,
-		&ascent,
-		&descent);
-		gdk_font_unref (font);
-	*/
 	b1.x = 0.0;
 	b1.y = 0.0-5; // - font->ascent;
 	b2.x = 0.0+5; // + rbearing;
 	b2.y = 0.0+5; // + font->descent;
 
 	item_data_set_relative_bbox (ITEM_DATA (textbox), &b1, &b2);
-	pango_font_description_free(font);
 }
 
 static gboolean
@@ -372,8 +309,7 @@ textbox_set_text (Textbox *textbox, const char *text)
 	textbox->priv->text = g_strdup (text);
 
 	textbox_update_bbox (textbox);
-
-	g_signal_emit_by_name (G_OBJECT(textbox), "text_changed", text);
+	g_signal_emit_by_name (G_OBJECT (textbox), "text_changed", text);
 }
 
 char *
@@ -436,10 +372,8 @@ textbox_print (ItemData *data, cairo_t *cr, SchematicPrintContext *ctx)
 
 	art_affine_identity (affine);
 
-	gnome_print_setfont(opc->ctx,
-		gnome_font_face_get_font_default(
-		opc->label_font, 6)
-	);
+	gnome_print_setfont (opc->ctx,
+		gnome_font_face_get_font_default (opc->label_font, 6));
 	print_draw_text (opc->ctx, priv->text, &src);
 	*/
 }

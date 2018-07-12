@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,11 +29,12 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 #ifndef __LOAD_LIBRARY_H
 #define __LOAD_LIBRARY_H
 
-#include <gnome.h>
-#include "sheet.h"
+#include <gtk/gtk.h>
+#include <goocanvas.h>
 
 typedef struct _SymbolObject SymbolObject;
 typedef struct _LibrarySymbol LibrarySymbol;
@@ -56,7 +59,7 @@ struct _SymbolObject {
 	union {
 		struct {
 			gboolean spline;
-			GnomeCanvasPoints *line;
+			GooCanvasPoints *line;
 		} uline;
 		struct {
 			double x1;

@@ -6,6 +6,12 @@ SUBDIRS = 		\
 	stock		\
 	pixmaps
 
+AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+	-DGTK_DISABLE_DEPRECATED \
+	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES \
+	-DGTK_DISABLE_SINGLE_INCLUDES
+
 oreganodir = $(datadir)/oregano
 
 INCLUDES = 	\
@@ -14,7 +20,7 @@ INCLUDES = 	\
 	-DGETTEXT_PACKAGE=\""oregano\""	\
 	-DGNOMELOCALEDIR=\""$(datadir)/locale"\" 	\
 	-I$(includedir) $(GNOME_INCLUDEDIR)		\
-	-DOREGANO_GLADEDIR=\""$(oreganodir)/glade"\"	\
+	-DOREGANO_UIDIR=\""$(oreganodir)/xml"\"	\
 	-DOREGANO_LIBRARYDIR=\""$(oreganodir)/libraries"\" \
 	-DOREGANO_MODELDIR=\""$(oreganodir)/models"\" \
 	-DOREGANO_LANGDIR=\""$(oreganodir)/language-specs"\" \
@@ -23,7 +29,6 @@ INCLUDES = 	\
 	-I./gplot \
 	-I./model \
 	-I./engines \
-	-I$(top_srcdir)/data/glade \
 	-I. \
 	$(OREGANO_CFLAGS)
 
@@ -46,8 +51,6 @@ oregano_PIXMAPS = \
 oregano_SOURCES = 	\
 	clipboard.h \
 	clipboard.c \
-	create-wire.c \
-	create-wire.h \
 	cursors.c \
 	cursors.h \
 	dialogs.c \
@@ -64,7 +67,6 @@ oregano_SOURCES = 	\
 	load-schematic.c \
 	load-schematic.h \
 	main.c \
-	main.h \
 	netlist-editor.c \
 	netlist-editor.h \
 	oregano-config.c \
@@ -75,8 +77,6 @@ oregano_SOURCES = 	\
 	part-browser.h \
 	plot.c \
 	plot.h \
-	plot-add-function.c \
-	plot-add-function.h \
 	save-schematic.c \
 	save-schematic.h \
 	schematic-view.c \
@@ -88,15 +88,15 @@ oregano_SOURCES = 	\
 	sim-settings.h \
 	simulation.c \
 	simulation.h \
-	smallicon.c \
-	smallicon.h \
 	splash.h \
 	splash.c \
 	stock.c \
 	stock.h \
 	xml-compat.h \
 	xml-helper.c \
-	xml-helper.h
+	xml-helper.h \
+	oregano.c \
+	oregano.h
 
 oregano_LDADD = \
-	$(OREGANO_LIBS) 
+	$(OREGANO_LIBS)

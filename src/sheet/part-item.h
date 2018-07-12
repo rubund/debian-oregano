@@ -6,11 +6,13 @@
  *  Richard Hult <rhult@hem.passagen.se>
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: http://arrakis.lug.fi.uba.ar/
+ * Web page: https://github.com/marc-lorber/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
+ * Copyright (C) 2009-2012  Marc Lorber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,6 +29,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 #ifndef __PART_ITEM_H
 #define __PART_ITEM_H
 
@@ -39,16 +42,14 @@ typedef struct _PartItemPriv PartItemPriv;
 #include "load-common.h"
 #include "part.h"
 
-#define TYPE_PART_ITEM		(part_item_get_type ())
-#define PART_ITEM(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PART_ITEM, PartItem))
-#define PART_ITEM_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PART_ITEM, PartItemClass))
-#define IS_PART_ITEM(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PART_ITEM))
-#define PART_ITEM_GET_CLASS(o)	(G_TYPE_INSTANCE_GET_CLASS ((o), TYPE_PART_ITEM, PartItemClass))
-
-#include "schematic-view.h"
+#define TYPE_PART_ITEM		   (part_item_get_type ())
+#define PART_ITEM(obj)		   (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PART_ITEM, PartItem))
+#define PART_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PART_ITEM, PartItemClass))
+#define IS_PART_ITEM(obj)	   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PART_ITEM))
+#define PART_ITEM_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TYPE_PART_ITEM, PartItemClass))
 
 struct _PartItem {
-	SheetItem	 parent_object;
+	SheetItem	  parent_object;
 	PartItemPriv *priv;
 };
 
@@ -58,12 +59,8 @@ struct _PartItemClass {
 
 GType	  part_item_get_type (void);
 PartItem *part_item_new (Sheet *sheet, Part *part);
-PartItem *part_item_new_from_part (Sheet *sheet, Part *part);
-void	  part_item_signal_connect_floating (PartItem *item);
-void	  part_item_signal_connect_floating_group (Sheet *sheet,
-			SchematicView *schematic_view);
-void	  part_item_create_canvas_items_for_preview (GnomeCanvasGroup *group,
-			LibraryPart *library_part);
+void	  part_item_create_canvas_items_for_preview (GooCanvasGroup *group,
+	      	LibraryPart *library_part);
 void	  part_item_update_node_label (PartItem *part);
 void      part_item_show_node_labels (PartItem *part, gboolean b);
 
