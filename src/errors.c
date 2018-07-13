@@ -5,9 +5,9 @@
  * Author:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
- * 
- * Web page: https://github.com/marc-lorber/oregano
- * 
+ *
+ * Web page: https://ahoi.io/project/oregano
+ *
  * Copyright (C) 2003-2008  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
  *
@@ -23,14 +23,13 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include "errors.h"
 
-GQuark
-oregano_error_quark (void) 
+GQuark oregano_error_quark (void)
 {
 	static GQuark err = 0;
 	if (!err) {
@@ -38,4 +37,3 @@ oregano_error_quark (void)
 	}
 	return err;
 }
-

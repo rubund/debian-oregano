@@ -4,8 +4,8 @@
  * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
- * 
- * Web page: https://github.com/marc-lorber/oregano
+ *
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -23,24 +23,20 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef _GPLOT_LINES_H_
 #define _GPLOT_LINES_H_
 
-#include "gplotfunction.h" 
+#include "gplotfunction.h"
 
+typedef enum { FUNCTIONAL_CURVE = 0, FREQUENCY_PULSE } GraphicType;
 
-typedef enum {
-	FUNCTIONAL_CURVE=0,
-	FREQUENCY_PULSE
-} GraphicType;
+#define GPLOT_LINES(obj) G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_GPLOT_LINES, GPlotLines)
+#define IS_GPLOT_LINES(obj) G_TYPE_CHECK_INSTANCE_TYPE (obj, TYPE_GPLOT_LINES)
 
-#define GPLOT_LINES(obj)        G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_GPLOT_LINES, GPlotLines)
-#define IS_GPLOT_LINES(obj)     G_TYPE_CHECK_INSTANCE_TYPE (obj, TYPE_GPLOT_LINES)
-
-GPlotFunction* g_plot_lines_new (gdouble *x, gdouble *y, guint points);
+GPlotFunction *g_plot_lines_new (gdouble *x, gdouble *y, guint points);
 
 #endif

@@ -4,12 +4,14 @@
  * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *  Guido Trentalancia <guido@trentalancia.com>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2017       Guido Trentalancia
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,8 +25,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __NGSPICE_ANALYSIS_H
@@ -35,37 +37,80 @@
 #include <sys/wait.h>
 #include <ctype.h>
 #include <glib/gi18n.h>
+#include "../tools/thread-pipe.h"
+#include "../tools/cancel-info.h"
 #include "ngspice.h"
 #include "netlist-helper.h"
 #include "dialogs.h"
 #include "engine-internal.h"
 #include "ngspice.h"
 
+/*
+ * The file buffer size (recommended value
+ * is 512 bytes).
+ */
+#define BSIZE_SP	512
+
+/**
+ * Progress is a shared variable between GUI thread
+ * that displays the progress bar and working thread
+ * which executes the heavy work.
+ */
+typedef struct {
+	gdouble progress;
+	// time (from g_get_monotonic_time) of the last writing access
+	gint64 time;
+	GMutex progress_mutex;
+} ProgressResources;
+
+/**
+ * AnalysisType is a shared variable between progress
+ * bar displaying GUI thread and the working thread.
+ */
+typedef struct {
+	AnalysisType type;
+	GMutex mutex;
+} AnalysisTypeShared;
+
+typedef struct {
+	ThreadPipe *pipe;
+	gchar *buf;
+	gboolean is_vanilla;
+	const SimSettings* sim_settings;
+	AnalysisTypeShared *current;
+	GList **analysis;
+	guint *num_analysis;
+	ProgressResources *progress_reader;
+	guint64 no_of_data_rows_ac;
+	guint64 no_of_data_rows_dc;
+	guint64 no_of_data_rows_op;
+	guint64 no_of_data_rows_transient;
+	guint64 no_of_data_rows_noise;
+	guint no_of_variables;
+	CancelInfo *cancel_info;
+} NgspiceAnalysisResources;
+
 // Parser STATUS
-struct _OreganoNgSpicePriv {
-	GPid 		child_pid;
-	gint 		child_stdout;
-	gint 		child_error;
-	GIOChannel *child_iochannel;
-	GIOChannel *child_ioerror;
-	gint 		child_iochannel_watch;
-	gint 		child_ioerror_watch;
-	Schematic  *schematic;
+struct _OreganoNgSpicePriv
+{
+	gboolean is_vanilla;
 
-	gboolean 	aborted;
+	GPid child_pid;
 
-	GList 	   *analysis;
-	gint 		num_analysis;
-	SimulationData *current;
-	double 		progress;
-	gboolean 	char_last_newline;
-	guint 		status;
-	guint 		buf_count;
-	// Added to store ngspice output into a file
-	// 		input for oregano...
-	FILE       *inputfp;
+	Schematic *schematic;
+
+	gboolean aborted;
+	CancelInfo *cancel_info;
+
+	GList *analysis;
+	guint num_analysis;
+	AnalysisTypeShared current;
+
+	ProgressResources progress_ngspice;
+	ProgressResources progress_reader;
 };
 
-void ngspice_parse (OreganoNgSpice *ngspice);
+void ngspice_analysis (NgspiceAnalysisResources *resources);
+void ngspice_save (const gchar *path_to_file, ThreadPipe *pipe, CancelInfo *cancel_info);
 
 #endif

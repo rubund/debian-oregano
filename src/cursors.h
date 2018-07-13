@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -26,28 +26,29 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 #ifndef __CURSORS_H
 #define __CURSORS_H
 
 #include <gtk/gtk.h>
 
-#define	OREGANO_CURSOR_LEFT_PTR 0
-#define	OREGANO_CURSOR_CROSS 1
-#define	OREGANO_CURSOR_PENCIL 2
-#define	OREGANO_CURSOR_CARET 3
+#define OREGANO_CURSOR_LEFT_PTR 0
+#define OREGANO_CURSOR_CROSS 1
+#define OREGANO_CURSOR_PENCIL 2
+#define OREGANO_CURSOR_CARET 3
 
-typedef struct {
+typedef struct
+{
 	GdkCursor *cursor;
 	GdkCursorType type;
 } OreganoCursor;
 
 extern OreganoCursor oregano_cursors[];
 
-void cursors_init	   (void);
-void cursors_shutdown  (void);
+void cursors_init (void);
+void cursors_shutdown (void);
 void cursor_set_widget (GtkWidget *w, int name);
 
 #endif

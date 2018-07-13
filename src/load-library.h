@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __LOAD_LIBRARY_H
@@ -41,41 +41,43 @@ typedef struct _LibrarySymbol LibrarySymbol;
 
 #include "load-common.h"
 
-struct _LibrarySymbol {
-	char  *name;
+struct _LibrarySymbol
+{
+	char *name;
 	GSList *connections;
 	GSList *symbol_objects;
 };
 
-typedef enum {
-	SYMBOL_OBJECT_LINE,
-	SYMBOL_OBJECT_ARC,
-	SYMBOL_OBJECT_TEXT
-} SymbolObjectType;
+typedef enum { SYMBOL_OBJECT_LINE, SYMBOL_OBJECT_ARC, SYMBOL_OBJECT_TEXT } SymbolObjectType;
 
-struct _SymbolObject {
+struct _SymbolObject
+{
 	SymbolObjectType type;
 
-	union {
-		struct {
+	union
+	{
+		struct
+		{
 			gboolean spline;
 			GooCanvasPoints *line;
 		} uline;
-		struct {
+		struct
+		{
 			double x1;
 			double y1;
 			double x2;
 			double y2;
 		} arc;
-		struct {
-			gint x,y;
+		struct
+		{
+			gint x, y;
 			gchar str[256];
 		} text;
 	} u;
 };
 
-Library			*library_parse_xml_file (const gchar *filename);
-LibrarySymbol	*library_get_symbol (const gchar *symbol_name);
-LibraryPart		*library_get_part (Library *library, const gchar *part_name);
+Library *library_parse_xml_file (const gchar *filename);
+LibrarySymbol *library_get_symbol (const gchar *symbol_name);
+LibraryPart *library_get_part (Library *library, const gchar *part_name);
 
 #endif

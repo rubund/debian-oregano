@@ -3,15 +3,17 @@
  *
  *
  * Authors:
- *	Ricardo Markiewicz <rmarkie@fi.uba.ar>
- *	Andres de Barbara <adebarbara@fi.uba.ar>
+ *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
+ *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *  Bernhard Schuster <bernhard@ahoi.io>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
- * Copyright (C) 1999-2001	Richard Hult
- * Copyright (C) 2003,2006	Ricardo Markiewicz
+ * Copyright (C) 1999-2001  Richard Hult
+ * Copyright (C) 2003,2006  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2013       Bernhard Schuster
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -25,8 +27,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include <gtk/gtk.h>
@@ -34,42 +36,29 @@
 
 #include "plot-add-function.h"
 #include "dialogs.h"
+#include "simulation.h"
 
-void
-plot_add_function_show (OreganoEngine *engine, SimulationData *current)
+void plot_add_function_show (OreganoEngine *engine, SimulationData *current)
 {
 	GtkBuilder *gui;
 	GError *perror = NULL;
 	GtkDialog *dialog;
-	gchar *msg;
 	GtkComboBoxText *op1, *op2, *functiontype;
 	int i;
 	gint result = 0;
 	GtkWidget *warning;
 	GtkWidget *container_temp;
-	
+
 	SimulationFunction *func = g_new0 (SimulationFunction, 1);
 
 	if ((gui = gtk_builder_new ()) == NULL) {
-		oregano_error (_("Could not create plot window."));
-		return;
-	} 
-	else gtk_builder_set_translation_domain (gui, NULL);
-
-	if (!g_file_test (OREGANO_UIDIR "/plot-add-function.ui",
-		    G_FILE_TEST_EXISTS)) {
-		msg = g_strdup_printf (
-			_("The file %s could not be found. You might need to reinstall Oregano to fix this"),
-			OREGANO_UIDIR "/plot-add-function.ui");
-		oregano_error_with_title (_("Could not create plot window."), msg);
-		g_free (msg);
+		oregano_error (_ ("Could not create plot window."));
 		return;
 	}
+	gtk_builder_set_translation_domain (gui, NULL);
 
-	if (gtk_builder_add_from_file (gui, OREGANO_UIDIR "/plot-add-function.ui", 
-	    &perror) <= 0) {
-		msg = perror->message;
-		oregano_error_with_title (_("Could not create plot window."), msg);
+	if (gtk_builder_add_from_file (gui, OREGANO_UIDIR "/plot-add-function.ui", &perror) <= 0) {
+		oregano_error_with_title (_ ("Could not create plot window."), perror->message);
 		g_error_free (perror);
 		return;
 	}
@@ -79,7 +68,7 @@ plot_add_function_show (OreganoEngine *engine, SimulationData *current)
 	op1 = GTK_COMBO_BOX_TEXT (gtk_combo_box_text_new ());
 	gtk_container_add (GTK_CONTAINER (container_temp), GTK_WIDGET (op1));
 	gtk_widget_show (GTK_WIDGET (op1));
-	
+
 	container_temp = GTK_WIDGET (gtk_builder_get_object (gui, "op2_alignment"));
 	op2 = GTK_COMBO_BOX_TEXT (gtk_combo_box_text_new ());
 	gtk_container_add (GTK_CONTAINER (container_temp), GTK_WIDGET (op2));
@@ -90,41 +79,39 @@ plot_add_function_show (OreganoEngine *engine, SimulationData *current)
 	gtk_container_add (GTK_CONTAINER (container_temp), GTK_WIDGET (functiontype));
 	gtk_widget_show (GTK_WIDGET (functiontype));
 
-	gtk_combo_box_text_append_text (functiontype, _("Substraction"));
-	gtk_combo_box_text_append_text (functiontype, _("Division"));
+	for (const gchar **ptr = SimulationFunctionTypeString; *ptr != NULL; ptr++) {
+		gtk_combo_box_text_append_text(functiontype, *ptr);
+	}
 
 	for (i = 1; i < current->n_variables; i++) {
-		if (current->type != DC_TRANSFER) {
+		if (current->type != ANALYSIS_TYPE_DC_TRANSFER) {
 			if (strchr (current->var_names[i], '#') == NULL) {
 				gtk_combo_box_text_append_text (op1, current->var_names[i]);
 				gtk_combo_box_text_append_text (op2, current->var_names[i]);
 			}
-		} 
-		else {
+		} else {
 			gtk_combo_box_text_append_text (op1, current->var_names[i]);
 			gtk_combo_box_text_append_text (op2, current->var_names[i]);
 		}
 	}
-	gtk_combo_box_set_active (GTK_COMBO_BOX (op1),0);
-	gtk_combo_box_set_active (GTK_COMBO_BOX (op2),1);
-	gtk_combo_box_set_active (GTK_COMBO_BOX (functiontype),0);
+	gtk_combo_box_set_active (GTK_COMBO_BOX (op1), 0);
+	gtk_combo_box_set_active (GTK_COMBO_BOX (op2), 1);
+	gtk_combo_box_set_active (GTK_COMBO_BOX (functiontype), 0);
 
 	result = gtk_dialog_run (GTK_DIALOG (dialog));
-	
+
 	if ((result == GTK_RESPONSE_OK) &&
 	    ((gtk_combo_box_get_active (GTK_COMBO_BOX (op1)) == -1) ||
-		 (gtk_combo_box_get_active (GTK_COMBO_BOX (op2)) == -1) ||
-		 (gtk_combo_box_get_active (GTK_COMBO_BOX (functiontype)) == -1))) 
-	{	
+	     (gtk_combo_box_get_active (GTK_COMBO_BOX (op2)) == -1) ||
+	     (gtk_combo_box_get_active (GTK_COMBO_BOX (functiontype)) == -1))) {
 		warning = gtk_message_dialog_new_with_markup (
-					NULL,
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING,
-					GTK_BUTTONS_OK, 
-					_("<span weight=\"bold\" size=\"large\">Neither function, nor operators have been chosen</span>\n\n"
-					"Please, take care to choose a function and their associated operators")); 
+		    NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+		    _ ("<span weight=\"bold\" size=\"large\">Neither function, nor "
+		       "operators have been chosen</span>\n\n"
+		       "Please, take care to choose a function and their associated "
+		       "operators"));
 
-		if (gtk_dialog_run (GTK_DIALOG (warning)) == GTK_RESPONSE_OK)  {
+		if (gtk_dialog_run (GTK_DIALOG (warning)) == GTK_RESPONSE_OK) {
 			gtk_widget_destroy (GTK_WIDGET (warning));
 			plot_add_function_show (engine, current);
 			gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -132,17 +119,19 @@ plot_add_function_show (OreganoEngine *engine, SimulationData *current)
 		}
 	}
 
-	if  ((result == GTK_RESPONSE_OK) &&
-	     ((gtk_combo_box_get_active (GTK_COMBO_BOX (op1)) != -1) &&
-		  (gtk_combo_box_get_active (GTK_COMBO_BOX (op2)) != -1) &&
-		  (gtk_combo_box_get_active (GTK_COMBO_BOX (functiontype)) != -1))) {
-	
+	if ((result == GTK_RESPONSE_OK) &&
+	    ((gtk_combo_box_get_active (GTK_COMBO_BOX (op1)) != -1) &&
+	     (gtk_combo_box_get_active (GTK_COMBO_BOX (op2)) != -1) &&
+	     (gtk_combo_box_get_active (GTK_COMBO_BOX (functiontype)) != -1))) {
+
+		func->type = gtk_combo_box_get_active (GTK_COMBO_BOX (functiontype));
+
 		for (i = 1; i < current->n_variables; i++) {
 			if (g_strcmp0 (current->var_names[i], gtk_combo_box_text_get_active_text (op1)) == 0)
 				func->first = i;
 			if (g_strcmp0 (current->var_names[i], gtk_combo_box_text_get_active_text (op2)) == 0)
 				func->second = i;
-			}
+		}
 		current->functions = g_list_append (current->functions, func);
 	}
 

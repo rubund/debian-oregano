@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include "sheet-item-factory.h"
@@ -35,13 +35,12 @@
 #include "part-item.h"
 #include "textbox-item.h"
 
-#define NG_DEBUG(s) if (0) g_print ("%s\n", s)
+#include "debug.h"
 
 // Create a SheetItem from an ItemData object. This is a bit ugly.
 // It could be beautified by having a method that creates the item.
 // E.g. sheet_item->new_from_data (data);
-SheetItem *
-sheet_item_factory_create_sheet_item (Sheet *sheet, ItemData *data)
+SheetItem *sheet_item_factory_create_sheet_item (Sheet *sheet, ItemData *data)
 {
 	SheetItem *item;
 
@@ -54,19 +53,17 @@ sheet_item_factory_create_sheet_item (Sheet *sheet, ItemData *data)
 
 	// Pick the right model.
 	if (IS_PART (data)) {
-		NG_DEBUG ("sheet_item_factory_create_sheet_item part\n\n");
 		item = SHEET_ITEM (part_item_new (sheet, PART (data)));
-	} 
-	else if (IS_WIRE (data)) {
-		NG_DEBUG ("sheet_item_factory_create_sheet_item wire\n\n");
+		NG_DEBUG ("part %p", item);
+	} else if (IS_WIRE (data)) {
 		item = SHEET_ITEM (wire_item_new (sheet, WIRE (data)));
-	} 
-	else if (IS_TEXTBOX (data)) {
-		NG_DEBUG ("sheet_item_factory_create_sheet_item text\n\n");
+		NG_DEBUG ("wire %p", item);
+	} else if (IS_TEXTBOX (data)) {
 		item = SHEET_ITEM (textbox_item_new (sheet, TEXTBOX (data)));
-	} 
-	else
+		NG_DEBUG ("text %p", item);
+	} else {
 		g_warning ("Unknown Item type.");
+	}
 
 	return item;
 }

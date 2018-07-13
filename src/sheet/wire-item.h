@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __WIRE_ITEM_H
@@ -39,26 +39,29 @@
 #include "sheet-item.h"
 #include "wire.h"
 
-#define TYPE_WIRE_ITEM         (wire_item_get_type ())
-#define WIRE_ITEM(obj)         (G_TYPE_CHECK_INSTANCE_CAST (obj, wire_item_get_type (), WireItem))
-#define WIRE_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST (klass, wire_item_get_type (), WireItemClass))
-#define IS_WIRE_ITEM(obj)      (G_TYPE_CHECK_INSTANCE_TYPE (obj, wire_item_get_type ()))
+#define TYPE_WIRE_ITEM (wire_item_get_type ())
+#define WIRE_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST (obj, wire_item_get_type (), WireItem))
+#define WIRE_ITEM_CLASS(klass)                                                                     \
+	(G_TYPE_CHECK_CLASS_CAST (klass, wire_item_get_type (), WireItemClass))
+#define IS_WIRE_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE (obj, wire_item_get_type ()))
 
 typedef struct _WireItemPriv WireItemPriv;
 
-typedef struct {
-	SheetItem 		parent_object;
-	WireItemPriv *	priv;
+typedef struct
+{
+	SheetItem parent_object;
+	WireItemPriv *priv;
 } WireItem;
 
-typedef struct {
+typedef struct
+{
 	SheetItemClass parent_class;
 } WireItemClass;
 
-GType 		wire_item_get_type (void);
-WireItem *	wire_item_new (Sheet *sheet, Wire *wire);
-void 		wire_item_initiate (Sheet *sheet);
-void 		wire_item_get_start_pos (WireItem *item, SheetPos *pos);
-void 		wire_item_get_length (WireItem *item, SheetPos *pos);
+GType wire_item_get_type (void);
+WireItem *wire_item_new (Sheet *sheet, Wire *wire);
+void wire_item_initiate (Sheet *sheet);
+void wire_item_get_start_pos (WireItem *item, Coords *pos);
+void wire_item_get_length (WireItem *item, Coords *pos);
 
 #endif

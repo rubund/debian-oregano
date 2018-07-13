@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,21 +26,21 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 #ifndef __NODE_H
 #define __NODE_H
 
 #include <gtk/gtk.h>
 
-#include "sheet-pos.h"
+#include "coords.h"
 #include "part.h"
 
-#define TYPE_NODE			 (node_get_type ())
-#define NODE(obj)			 (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_NODE, Node))
-#define NODE_CLASS(klass)	 (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_NODE, NodeClass))
-#define IS_NODE(obj)		 (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_NODE))
+#define TYPE_NODE (node_get_type ())
+#define NODE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_NODE, Node))
+#define NODE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_NODE, NodeClass))
+#define IS_NODE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_NODE))
 #define IS_NODE_CLASS(klass) (G_TYPE_INSTANCE_GET_CLASS ((klass), TYPE_NODE, NodeClass))
 
 typedef struct _Node Node;
@@ -48,7 +48,8 @@ typedef struct _NodeClass NodeClass;
 
 #include "wire.h"
 
-struct _Node {
+struct _Node
+{
 	GObject parent;
 
 	// Used for traversing all nodes in the netlist generation.
@@ -63,7 +64,7 @@ struct _Node {
 	GSList *pins;
 	GSList *wires;
 
-	SheetPos key;
+	Coords key;
 };
 
 struct _NodeClass
@@ -72,18 +73,21 @@ struct _NodeClass
 };
 
 GType node_get_type (void);
-Node *node_new (SheetPos pos);
+Node *node_new (Coords pos);
 gint node_is_empty (Node *node);
 
-gint node_add_pin (Node *node, Pin *pin);
-gint node_remove_pin (Node *node, Pin *pin);
+gboolean node_add_pin (Node *node, Pin *pin);
+gboolean node_remove_pin (Node *node, Pin *pin);
 
-gint node_add_wire (Node *node, Wire *wire);
-gint node_remove_wire (Node *node, Wire *wire);
+gboolean node_add_wire (Node *node, Wire *wire);
+gboolean node_remove_wire (Node *node, Wire *wire);
 
-gint node_is_visited (Node *node);
+gboolean node_is_visited (Node *node);
 void node_set_visited (Node *node, gboolean is_visited);
 
 gboolean node_needs_dot (Node *node);
+
+guint node_hash (gconstpointer key);
+gboolean node_equal (gconstpointer a, gconstpointer b);
 
 #endif

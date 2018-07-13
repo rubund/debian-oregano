@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __CREATE_WIRE_H
@@ -40,15 +40,26 @@
 #include "wire-item.h"
 #include "schematic-view.h"
 
-typedef struct _CreateWireContext CreateWireContext;
+typedef enum { WIRE_START, WIRE_ACTIVE, WIRE_DISABLED } WireState;
 
-typedef struct {
+typedef struct _CreateWireInfo CreateWireInfo;
+
+struct _CreateWireInfo
+{
+	WireState state;
 	GooCanvasPolyline *line;
-	GooCanvasPoints *  points;
-	WireDir 		   direction;	 // Direction of the first wire segment.
-} CreateWire;
+	GooCanvasPoints *points;
+	GooCanvasEllipse *dot;
+	WireDir direction;
+	gulong event_handler_id;
+	//	gulong			 cancel_handler_id;
+};
 
-CreateWireContext *	create_wire_initiate (Sheet *sheet);
-void 				create_wire_exit (CreateWireContext *cwc);
+CreateWireInfo *create_wire_info_new (Sheet *sheet);
+void create_wire_destroy (CreateWireInfo *wire_info);
+gboolean create_wire_setup (Sheet *sheet);
+gboolean create_wire_orientationtoggle (Sheet *sheet);
+gboolean create_wire_event (Sheet *sheet, GdkEvent *event, gpointer data);
+gboolean create_wire_cleanup (Sheet *sheet);
 
 #endif

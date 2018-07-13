@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 #ifndef __MAIN_H
 #define __MAIN_H
@@ -38,33 +38,31 @@
 
 G_BEGIN_DECLS
 
-#define OREGANO_TYPE_APPLICATION             (oregano_get_type ())
-#define OREGANO_APPLICATION(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), OREGANO_TYPE_APPLICATION, Oregano))
-#define OREGANO_APPLICATION_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), OREGANO_TYPE_APPLICATION, OreganoClass))
-#define OREGANO_IS_APPLICATION(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OREGANO_TYPE_APPLICATION))
-#define OREGANO_IS_APPLICATION_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), OREGANO_TYPE_APPLICATION))
-#define OREGANO_APPLICATION_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), OREGANO_TYPE_APPLICATION, OreganoClass))
+#define OREGANO_TYPE_APPLICATION (oregano_get_type ())
+#define OREGANO_APPLICATION(obj)                                                                   \
+	(G_TYPE_CHECK_INSTANCE_CAST ((obj), OREGANO_TYPE_APPLICATION, Oregano))
+#define OREGANO_APPLICATION_CLASS(klass)                                                           \
+	(G_TYPE_CHECK_CLASS_CAST ((klass), OREGANO_TYPE_APPLICATION, OreganoClass))
+#define OREGANO_IS_APPLICATION(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OREGANO_TYPE_APPLICATION))
+#define OREGANO_IS_APPLICATION_CLASS(klass)                                                        \
+	(G_TYPE_CHECK_CLASS_TYPE ((klass), OREGANO_TYPE_APPLICATION))
+#define OREGANO_APPLICATION_GET_CLASS(obj)                                                         \
+	(G_TYPE_INSTANCE_GET_CLASS ((obj), OREGANO_TYPE_APPLICATION, OreganoClass))
 
-typedef struct {
+typedef struct
+{
 	GtkApplication parent_instance;
 } Oregano;
 
-typedef struct {
+typedef struct
+{
 	GtkApplicationClass parent_class;
 } OreganoClass;
 
-typedef struct {
+typedef struct
+{
 	GList *libraries;
 	GSList *clipboard;
-
-	// list for library paths
-	GList *lib_path;
-
-	// list for model paths
-	GList *model_path;
-
-	// hash table with model names as keys and paths as data
-	GHashTable *models;
 
 	GSettings *settings;
 	gint engine;
@@ -75,7 +73,6 @@ typedef struct {
 
 extern OreganoApp oregano;
 extern int oregano_debugging;
-
 
 Oregano *oregano_new (void);
 

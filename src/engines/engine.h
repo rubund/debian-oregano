@@ -5,7 +5,7 @@
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -23,8 +23,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __ENGINE_H
@@ -35,31 +35,29 @@
 #include "schematic.h"
 #include "simulation.h"
 
-
-#define OREGANO_ENGINE(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj), OREGANO_TYPE_ENGINE, OreganoEngine))
-#define OREGANO_IS_ENGINE(obj)          (G_TYPE_CHECK_INSTANCE_TYPE((obj), OREGANO_TYPE_ENGINE))
+#define OREGANO_ENGINE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), OREGANO_TYPE_ENGINE, OreganoEngine))
+#define OREGANO_IS_ENGINE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), OREGANO_TYPE_ENGINE))
 
 typedef struct _OreganoEngine OreganoEngine;
 
-// Engines IDs 
-enum {
-	OREGANO_ENGINE_GNUCAP=0,
-	OREGANO_ENGINE_NGSPICE,
-	OREGANO_ENGINE_COUNT
-};
+// Engines IDs
+enum { OREGANO_ENGINE_GNUCAP = 0, OREGANO_ENGINE_SPICE3, OREGANO_ENGINE_NGSPICE, OREGANO_ENGINE_COUNT };
 
 OreganoEngine *oregano_engine_factory_create_engine (gint type, Schematic *sm);
 
-GType    oregano_engine_get_type (void);
-void     oregano_engine_start (OreganoEngine *engine);
-void     oregano_engine_stop (OreganoEngine *engine);
+GType oregano_engine_get_type (void);
+void oregano_engine_start (OreganoEngine *engine);
+void oregano_engine_stop (OreganoEngine *engine);
 gboolean oregano_engine_has_warnings (OreganoEngine *engine);
-void     oregano_engine_get_progress (OreganoEngine *engine, double *p);
-void     oregano_engine_generate_netlist (OreganoEngine *engine, 
-    			const gchar *file, GError **error);
-GList   *oregano_engine_get_results (OreganoEngine *engine);
-gchar   *oregano_engine_get_current_operation (OreganoEngine *);
+void oregano_engine_get_progress_solver (OreganoEngine *engine, double *p);
+void oregano_engine_get_progress_reader (OreganoEngine *engine, double *p);
+gboolean oregano_engine_generate_netlist (OreganoEngine *engine, const gchar *file, GError **error);
+GList *oregano_engine_get_results (OreganoEngine *engine);
+gchar *oregano_engine_get_current_operation_solver (OreganoEngine *);
+gchar *oregano_engine_get_current_operation_reader (OreganoEngine *);
 gboolean oregano_engine_is_available (OreganoEngine *);
-gchar   *oregano_engine_get_analysis_name (SimulationData *id);
+gchar *oregano_engine_get_analysis_name_by_type(AnalysisType type);
+gchar *oregano_engine_get_engine_name_by_index (const guint index);
+gchar *oregano_engine_get_analysis_name (SimulationData *id);
 
 #endif

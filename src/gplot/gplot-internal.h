@@ -3,8 +3,8 @@
  *
  * Authors:
  *  Marc Lorber <lorber.marc@wanadoo.fr>
- * 
- * Web page: https://github.com/marc-lorber/oregano
+ *
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -22,8 +22,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef _GPLOT_INTERNAL_H_
@@ -41,30 +41,33 @@
 typedef struct _GPlotClass GPlotClass;
 typedef struct _GPlotPriv GPlotPriv;
 
-
-struct _GPlot {
+struct _GPlot
+{
 	GtkLayout parent;
 
 	GPlotPriv *priv;
 };
-struct _GPlotClass {
+struct _GPlotClass
+{
 	GtkLayoutClass parent_class;
 };
 
-
 // Internal definitions associated to gplotfunction.h
 
-#define TYPE_GPLOT_FUNCTION            (g_plot_function_get_type ())
-#define GPLOT_FUNCTION_CLASS(klass)     G_TYPE_CHECK_CLASS_CAST (klass, TYPE_GPLOT_FUNCTION, GPlotFunctionClass)
-#define GPLOT_FUNCTION_GET_CLASS(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), TYPE_GPLOT_FUNCTION, GPlotFunctionClass))
+#define TYPE_GPLOT_FUNCTION (g_plot_function_get_type ())
+#define GPLOT_FUNCTION_CLASS(klass)                                                                \
+	G_TYPE_CHECK_CLASS_CAST (klass, TYPE_GPLOT_FUNCTION, GPlotFunctionClass)
+#define GPLOT_FUNCTION_GET_CLASS(inst)                                                             \
+	(G_TYPE_INSTANCE_GET_INTERFACE ((inst), TYPE_GPLOT_FUNCTION, GPlotFunctionClass))
 
 typedef struct _GPlotFunctionClass GPlotFunctionClass;
 
-struct _GPlotFunctionClass {
+struct _GPlotFunctionClass
+{
 	GTypeInterface parent;
 
-	void (*draw)     (GPlotFunction *, cairo_t *, GPlotFunctionBBox *);
-	void (*get_bbox) (GPlotFunction *, GPlotFunctionBBox *);
+	void (*draw)(GPlotFunction *, cairo_t *, GPlotFunctionBBox *);
+	void (*get_bbox)(GPlotFunction *, GPlotFunctionBBox *);
 };
 
 #endif

@@ -7,12 +7,14 @@
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *  Bernhard Schuster <bernhard@ahoi.io>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2014       Bernhard Schuster
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,26 +28,30 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __PART_PRIVATE_H
 #define __PART_PRIVATE_H
 
-struct _PartPriv {
-	guint16  num_pins : 16;
-	guint16	 rotation : 16;
-	IDFlip	 flip	  : 8;
+#include <glib.h>
 
-	gchar   *name;
-	GSList  *properties;
-	GSList  *labels;
+struct _PartPriv
+{
+	guint16 num_pins : 16;
+	//	guint16	 rotation : 16;
+	IDFlip flip : 8;
 
-	gchar   *symbol_name;
+	gchar *name;
+	GSList *properties;
+	GSList *labels;
+
+	gchar *symbol_name;
 	Library *library;
 
-	Pin		*pins; // Array of pins.
+	Pin *pins; // Array of pins, without any transformations applied.
+	Pin *pins_orig;
 };
 
 #endif
