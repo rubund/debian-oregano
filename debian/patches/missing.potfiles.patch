@@ -8,15 +8,3 @@ Subject: missing.potfiles
  po/POTFILES.in | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/po/POTFILES.in b/po/POTFILES.in
-index f244336..e76211c 100644
---- a/po/POTFILES.in
-+++ b/po/POTFILES.in
-@@ -45,6 +45,7 @@ src/oregano-utils.c
- src/oregano-config.c
- src/engines/netlist-helper.c
- src/engines/gnucap.c
-+src/engines/ngspice.c
- src/engines/engine.c
- src/engines/ngspice.c
- src/engines/ngspice-analysis.c

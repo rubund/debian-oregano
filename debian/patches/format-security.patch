@@ -8,34 +8,3 @@ Subject: format-security
  src/dialogs.c | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/src/dialogs.c b/src/dialogs.c
-index 1c6b90d..22d3b6d 100644
---- a/src/dialogs.c
-+++ b/src/dialogs.c
-@@ -63,7 +63,7 @@ oregano_error_with_title (gchar *title, gchar *desc)
- 		GTK_DIALOG_MODAL,
- 		GTK_MESSAGE_ERROR,
- 		GTK_BUTTONS_OK,
--		span_msg->str);
-+		"%s", span_msg->str);
- 
- 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
- 
-@@ -99,7 +99,7 @@ oregano_warning_with_title (gchar *title, gchar *desc)
- 		GTK_DIALOG_MODAL,
- 		GTK_MESSAGE_WARNING,
- 		GTK_BUTTONS_OK,
--		span_msg->str);
-+		"%s", span_msg->str);
- 
- 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
- 
-@@ -120,7 +120,7 @@ oregano_question (gchar *msg)
- 		GTK_MESSAGE_QUESTION,
- 		GTK_BUTTONS_OK,
- 		GTK_BUTTONS_CANCEL,
--		msg);
-+		"%s", msg);
- 
- 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CANCEL);
- 
