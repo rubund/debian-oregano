@@ -10,23 +10,15 @@ Subject: missing.potfiles
  2 files changed, 3 insertions(+)
  create mode 100644 po/POTFILES.skip
 
-diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 7579bc0..ceaeebb 100644
---- a/po/POTFILES.in
-+++ b/po/POTFILES.in
-@@ -42,6 +42,7 @@ src/oregano-impl.c
+Index: debian-oregano/po/POTFILES.in
+===================================================================
+--- debian-oregano.orig/po/POTFILES.in
++++ debian-oregano/po/POTFILES.in
+@@ -45,6 +45,7 @@ src/oregano-utils.c
  src/oregano-config.c
- src/engines/netlist.c
+ src/engines/netlist-helper.c
  src/engines/gnucap.c
 +src/engines/ngspice.c
  src/engines/engine.c
- src/netlist-editor.c
- src/main.c
-diff --git a/po/POTFILES.skip b/po/POTFILES.skip
-new file mode 100644
-index 0000000..255ed53
---- /dev/null
-+++ b/po/POTFILES.skip
-@@ -0,0 +1,2 @@
-+data/netlist.lang
-+data/oregano.desktop.in
+ src/engines/ngspice.c
+ src/engines/ngspice-analysis.c

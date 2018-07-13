@@ -6,10 +6,10 @@ Subject: Update russian translation
  po/ru.po | 11 +++++------
  1 file changed, 5 insertions(+), 6 deletions(-)
 
-diff --git a/po/ru.po b/po/ru.po
-index b5a8c1b..2cb584d 100644
---- a/po/ru.po
-+++ b/po/ru.po
+Index: debian-oregano/po/ru.po
+===================================================================
+--- debian-oregano.orig/po/ru.po
++++ debian-oregano/po/ru.po
 @@ -8,7 +8,7 @@ msgstr ""
  "Project-Id-Version: ru\n"
  "Report-Msgid-Bugs-To: \n"
@@ -19,7 +19,7 @@ index b5a8c1b..2cb584d 100644
  "Last-Translator: Yuri Kozlov <kozlov.y@gmail.com>\n"
  "Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
  "MIME-Version: 1.0\n"
-@@ -296,11 +296,11 @@ msgstr "Настройки моделирования"
+@@ -296,11 +296,11 @@ msgstr "Настройки модели�
  
  #: ../data/dialogs/sim-settings.glade2.h:16
  msgid "Source"

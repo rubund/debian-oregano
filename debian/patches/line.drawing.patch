@@ -9,20 +9,20 @@ Subject: line.drawing
  src/sheet/sheet-item.c | 6 +++++-
  1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/src/sheet/sheet-item.c b/src/sheet/sheet-item.c
-index 35120e3..e7aa1e1 100644
---- a/src/sheet/sheet-item.c
-+++ b/src/sheet/sheet-item.c
-@@ -525,7 +525,11 @@ sheet_item_event (SheetItem *sheet_item, const GdkEvent *event, SchematicView *s
- 
- 				item_data = SHEET_ITEM (list->data)->priv->data;
- 				item_data_move (item_data, &delta);
--				item_data_register (item_data);
-+				if (item_data_register(item_data) == -1) {
-+					/* Merged item needs to be deleted */
-+					g_object_unref (G_OBJECT (item_data));
-+					gtk_object_destroy(GTK_OBJECT(list->data));
-+				}
- 			}
- 
- 			break;
+Index: debian-oregano/src/sheet/sheet-item.c
+===================================================================
+--- debian-oregano.orig/src/sheet/sheet-item.c
++++ debian-oregano/src/sheet/sheet-item.c
+@@ -465,7 +465,11 @@ sheet_item_event (GooCanvasItem *sheet_i
+ 				pos.x = snapped_x;
+ 				pos.y = snapped_y;
+ 				item_data_move (item_data, &pos);
+-                item_data_register (item_data);
++ 				if (item_data_register(item_data) == -1) {
++ 					/* Merged item needs to be deleted */
++ 					g_object_unref (G_OBJECT (item_data));
++ 					gtk_object_destroy(GTK_OBJECT(list->data));
++ 				}
+             }
+ 			g_list_free_full (list, g_object_unref);
+ 				

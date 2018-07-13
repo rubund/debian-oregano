@@ -8,16 +8,17 @@ Subject: remove.unneded.docs
  Makefile.am | 2 --
  1 file changed, 2 deletions(-)
 
-diff --git a/Makefile.am b/Makefile.am
-index ab9a5a8..eab1eac 100644
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -5,9 +5,7 @@ SUBDIRS = po src data help
+Index: debian-oregano/Makefile.am
+===================================================================
+--- debian-oregano.orig/Makefile.am
++++ debian-oregano/Makefile.am
+@@ -7,10 +7,8 @@ SUBDIRS = po src data help
  oreganodocdir = $(datadir)/doc/oregano
  oreganodoc_DATA = \
  	README\
 -	COPYING\
  	AUTHORS\
+ 	ChangeLog\
 -	INSTALL\
  	NEWS\
  	TODO
