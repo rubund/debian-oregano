@@ -10,3 +10,6 @@ LDFLAGS += -lcairo
 
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-update-mimedb
+
+override_dh_auto_build:
+	./waf configure build --release
