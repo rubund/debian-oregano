@@ -5,15 +5,13 @@ Subject: missing.potfiles
 ## Description: Adds missing files to POTFILES.in and POTFILES.skip
 ## Origin/Author: Maximiliano Curia <maxy@debian.org>
 ---
- po/POTFILES.in   | 1 +
- po/POTFILES.skip | 2 ++
- 2 files changed, 3 insertions(+)
- create mode 100644 po/POTFILES.skip
+ po/POTFILES.in | 1 +
+ 1 file changed, 1 insertion(+)
 
-Index: debian-oregano/po/POTFILES.in
-===================================================================
---- debian-oregano.orig/po/POTFILES.in
-+++ debian-oregano/po/POTFILES.in
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index f244336..e76211c 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
 @@ -45,6 +45,7 @@ src/oregano-utils.c
  src/oregano-config.c
  src/engines/netlist-helper.c

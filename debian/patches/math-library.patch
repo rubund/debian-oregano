@@ -6,10 +6,10 @@ Subject: math-library
  src/Makefile.am | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Index: debian-oregano/src/Makefile.am
-===================================================================
---- debian-oregano.orig/src/Makefile.am
-+++ debian-oregano/src/Makefile.am
+diff --git a/src/Makefile.am b/src/Makefile.am
+index f4090a4..9171b77 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
 @@ -99,4 +99,4 @@ oregano_SOURCES = 	\
  	oregano.h
  
