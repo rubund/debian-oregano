@@ -1,9 +1,9 @@
-oregano (0.82-0.1) UNRELEASED; urgency=medium
+oregano (0.84.22-1) UNRELEASED; urgency=medium
 
   * Non-maintainer upload.
   * 
 
- -- Ruben Undheim <ruben.undheim@gmail.com>  Thu, 12 Jul 2018 23:15:08 +0200
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Fri, 13 Jul 2018 06:28:37 +0000
 
 oregano (0.70-3) unstable; urgency=medium
 
