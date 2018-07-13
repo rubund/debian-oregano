@@ -1,0 +1,74 @@
+From: Ruben Undheim <ruben.undheim@gmail.com>
+Date: Fri, 13 Jul 2018 06:06:20 +0000
+Subject: Remove GTK_DISABLE_DEPRECATED
+
+---
+ src/Makefile.am         | 1 -
+ src/engines/Makefile.am | 1 -
+ src/gplot/Makefile.am   | 2 +-
+ src/model/Makefile.am   | 1 -
+ src/sheet/Makefile.am   | 2 +-
+ 5 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 9171b77..b5acfe3 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -8,7 +8,6 @@ SUBDIRS = 		\
+ 
+ AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+ 	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+-	-DGTK_DISABLE_DEPRECATED \
+ 	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES \
+ 	-DGTK_DISABLE_SINGLE_INCLUDES
+ 
+diff --git a/src/engines/Makefile.am b/src/engines/Makefile.am
+index 09af9f1..0cb740f 100644
+--- a/src/engines/Makefile.am
++++ b/src/engines/Makefile.am
+@@ -2,7 +2,6 @@ oreganodir = $(datadir)/oregano
+ 
+ AM_CFLAGS = -g -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+ 	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+-	-DGTK_DISABLE_DEPRECATED \
+ 	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES \
+ 	-DGTK_DISABLE_SINGLE_INCLUDES
+ 
+diff --git a/src/gplot/Makefile.am b/src/gplot/Makefile.am
+index a7dd460..e166bee 100644
+--- a/src/gplot/Makefile.am
++++ b/src/gplot/Makefile.am
+@@ -2,7 +2,7 @@ oreganodir = $(datadir)/oregano
+ 
+ AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+ 	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+-	-DGTK_DISABLE_DEPRECATED -DGTK_DISABLE_SINGLE_INCLUDES \
++	-DGTK_DISABLE_SINGLE_INCLUDES \
+ 	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES
+ 
+ INCLUDES = \
+diff --git a/src/model/Makefile.am b/src/model/Makefile.am
+index 6abbb8b..943b588 100644
+--- a/src/model/Makefile.am
++++ b/src/model/Makefile.am
+@@ -2,7 +2,6 @@ oreganodir = $(datadir)/oregano
+ 
+ AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+ 	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+-	-DGTK_DISABLE_DEPRECATED \
+ 	-DG_DISABLE_SINGLE_INCLUDES -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES \
+ 	-DGTK_DISABLE_SINGLE_INCLUDES
+ 
+diff --git a/src/sheet/Makefile.am b/src/sheet/Makefile.am
+index d83a960..b0ee58a 100644
+--- a/src/sheet/Makefile.am
++++ b/src/sheet/Makefile.am
+@@ -2,7 +2,7 @@ oreganodir = $(datadir)/oregano
+ 
+ AM_CFLAGS = -Wall -DG_DISABLE_DEPRECATED -DGSEAL_ENABLE \
+ 	-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED \
+-	-DGTK_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES \
++	-DG_DISABLE_SINGLE_INCLUDES \
+ 	-DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES -DGTK_DISABLE_SINGLE_INCLUDES
+ 
+ INCLUDES = \
