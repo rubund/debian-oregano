@@ -2,15 +2,17 @@
  * splash.c
  *
  *
- * Author:
+ * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
- * 
- * Web page: https://github.com/marc-lorber/oregano
+ *  Bernhard Schuster <bernhard@ahoi.io>
  *
- * Copyright (C) 1999-2001	Richard Hult
- * Copyright (C) 2003,2006	Ricardo Markiewicz
+ * Web page: https://ahoi.io/project/oregano
+ *
+ * Copyright (C) 1999-2001  Richard Hult
+ * Copyright (C) 2003,2006  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2013       Bernhard Schuster
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,19 +26,18 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
-
 
 #include <unistd.h>
 #include <glib/gi18n.h>
 
 #include "splash.h"
 #include "dialogs.h"
+#include "errors.h"
 
-static void
-oregano_splash_destroy (GtkWidget *w, GdkEvent *event, Splash *sp)
+static void oregano_splash_destroy (GtkWidget *w, GdkEvent *event, Splash *sp)
 {
 	if ((event->type == GDK_BUTTON_PRESS) && (event->button.button == 1)) {
 		if (sp->can_destroy)
@@ -44,36 +45,20 @@ oregano_splash_destroy (GtkWidget *w, GdkEvent *event, Splash *sp)
 	}
 }
 
-Splash *
-oregano_splash_new ()
+Splash *oregano_splash_new (GError **error)
 {
 	GtkBuilder *gui;
-	GError *perror = NULL;
 	Splash *sp;
 	GtkEventBox *event;
-	gchar *msg;
-	
+
 	if ((gui = gtk_builder_new ()) == NULL) {
-		oregano_error (_("Could not create splash message."));
-		return NULL;
-	} 
-	else gtk_builder_set_translation_domain (gui, NULL);
-	
-	if (!g_file_test (OREGANO_UIDIR "/splash.ui", G_FILE_TEST_EXISTS) ||
-	     !g_file_test (OREGANO_UIDIR "/splash.xpm", G_FILE_TEST_EXISTS)) {
-		msg = g_strdup_printf (
-			_("The files %s or %s could not be found. You might need to reinstall Oregano to fix this."),
-			OREGANO_UIDIR "/splash.ui",  OREGANO_UIDIR "/splash.xpm");
-		oregano_error_with_title (_("Could not create splash message."), msg);
-		g_free (msg);
+		g_set_error_literal (error, OREGANO_ERROR, OREGANO_UI_ERROR_NO_BUILDER,
+		                     _ ("Failed to spawn builder"));
 		return NULL;
 	}
-	
-	if (gtk_builder_add_from_file (gui, OREGANO_UIDIR "/splash.ui", 
-	    &perror) <= 0) {
-		msg = perror->message;
-		oregano_error_with_title (_("Could not create splash message."), msg);
-		g_error_free (perror);
+	gtk_builder_set_translation_domain (gui, NULL);
+
+	if (gtk_builder_add_from_file (gui, OREGANO_UIDIR "/splash.ui", error) <= 0) {
 		return NULL;
 	}
 
@@ -81,6 +66,7 @@ oregano_splash_new ()
 	sp->can_destroy = FALSE;
 
 	sp->win = GTK_WINDOW (gtk_builder_get_object (gui, "splash"));
+	gtk_window_set_keep_above (sp->win, TRUE);
 	sp->lbl = GTK_LABEL (gtk_builder_get_object (gui, "label"));
 	sp->progress = GTK_WIDGET (gtk_builder_get_object (gui, "pbar"));
 
@@ -95,8 +81,7 @@ oregano_splash_new ()
 	return sp;
 }
 
-gboolean
-oregano_splash_free (Splash *sp)
+gboolean oregano_splash_free (Splash *sp)
 {
 	/* Need to disconnect the EventBox Widget! */
 	g_signal_handlers_disconnect_by_func (sp->event, oregano_splash_destroy, sp);
@@ -105,8 +90,7 @@ oregano_splash_free (Splash *sp)
 	return FALSE;
 }
 
-void
-oregano_splash_step (Splash *sp, char *s)
+void oregano_splash_step (Splash *sp, char *s)
 {
 	gtk_label_set_text (sp->lbl, s);
 	gtk_progress_bar_pulse (GTK_PROGRESS_BAR (sp->progress));
@@ -114,12 +98,9 @@ oregano_splash_step (Splash *sp, char *s)
 		gtk_main_iteration ();
 }
 
-
-void
-oregano_splash_done (Splash *sp, char *s)
+void oregano_splash_done (Splash *sp, char *s)
 {
 	gtk_label_set_text (sp->lbl, s);
 	sp->can_destroy = TRUE;
 	g_timeout_add (2000, (GSourceFunc)(oregano_splash_free), sp);
 }
-

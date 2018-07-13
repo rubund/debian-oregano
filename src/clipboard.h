@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __CLIPBOARD_H
@@ -35,14 +35,13 @@
 
 typedef struct _ClipboardData ClipboardData;
 
-typedef void (*ClipBoardFunction) (ClipboardData *data, gpointer user_data);
+typedef void (*ClipBoardFunction)(ClipboardData *data, gpointer user_data);
 
-void		   clipboard_empty (void);
-gboolean	   clipboard_is_empty (void);
-void		   clipboard_foreach (ClipBoardFunction callback,
-								  gpointer user_data);
-void		   clipboard_add_object (GObject *item);
-GObjectClass   *clipboard_data_get_item_class (ClipboardData *data);
-GObject		   *clipboard_data_get_item_data (ClipboardData *data);
+void clipboard_empty (void);
+gboolean clipboard_is_empty (void);
+void clipboard_foreach (ClipBoardFunction callback, gpointer user_data);
+void clipboard_add_object (GObject *item);
+GObjectClass *clipboard_data_get_item_class (ClipboardData *data);
+GObject *clipboard_data_get_item_data (ClipboardData *data);
 
 #endif

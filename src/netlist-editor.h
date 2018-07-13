@@ -6,7 +6,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 2004-2008 Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
@@ -23,8 +23,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __NETLIST_EDIT_H
@@ -32,38 +32,41 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <gtksourceview/gtksourceview.h>
+#include <gtksourceview/gtksource.h>
 
 #include "schematic-view.h"
 #include "errors.h"
 #include "engine.h"
 
-#define TYPE_NETLIST_EDITOR				(netlist_editor_get_type ())
-#define NETLIST_EDITOR(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_NETLIST_EDITOR, NetlistEditor))
-#define NETLIST_EDITOR_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_NETLIST_EDITOR, NetlistEditorClass))
-#define IS_NETLIST_EDITOR(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_NETLIST_EDITOR))
-#define IS_NETLIST_EDITOR_CLASS(klass) 		(G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_NETLIST_EDITOR, NetlistEditorClass))
+#define TYPE_NETLIST_EDITOR (netlist_editor_get_type ())
+#define NETLIST_EDITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_NETLIST_EDITOR, NetlistEditor))
+#define NETLIST_EDITOR_CLASS(klass)                                                                \
+	(G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_NETLIST_EDITOR, NetlistEditorClass))
+#define IS_NETLIST_EDITOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_NETLIST_EDITOR))
+#define IS_NETLIST_EDITOR_CLASS(klass)                                                             \
+	(G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_NETLIST_EDITOR, NetlistEditorClass))
 
-
-typedef struct _NetlistEditor	   NetlistEditor;
+typedef struct _NetlistEditor NetlistEditor;
 typedef struct _NetlistEditorClass NetlistEditorClass;
-typedef struct _NetlistEditorPriv  NetlistEditorPriv;
+typedef struct _NetlistEditorPriv NetlistEditorPriv;
 
-struct _NetlistEditor {
+struct _NetlistEditor
+{
 	GObject parent;
 
 	NetlistEditorPriv *priv;
 };
 
-struct _NetlistEditorClass {
+struct _NetlistEditorClass
+{
 	GObjectClass parent_class;
 
 	// Signals go here
 };
 
 GType netlist_editor_get_type (void);
-NetlistEditor *netlist_editor_new_from_file (gchar * filename); 
+NetlistEditor *netlist_editor_new_from_file (gchar *filename);
 NetlistEditor *netlist_editor_new_from_schematic_view (SchematicView *sv);
-NetlistEditor *netlist_editor_new (GtkSourceBuffer * textbuffer);
+NetlistEditor *netlist_editor_new (GtkSourceBuffer *textbuffer);
 
 #endif

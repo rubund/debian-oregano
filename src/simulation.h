@@ -7,12 +7,14 @@
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *  Guido Trentalancia <guido@trentalancia.com>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2017       Guido Trentalancia
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,8 +28,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __SIMULATION_H
@@ -41,94 +43,112 @@
 typedef struct _SimulationData SimulationData;
 
 typedef enum {
-	OP_POINT	,
-	TRANSIENT	,
-	DC_TRANSFER ,
-	AC			,
-	TRANSFER	,
-	DISTORTION	,
-	NOISE		,
-	POLE_ZERO	,
-	SENSITIVITY ,
-	FOURIER		,
-	ANALYSIS_UNKNOWN
+	ANALYSIS_TYPE_NONE,
+	ANALYSIS_TYPE_OP_POINT,
+	ANALYSIS_TYPE_TRANSIENT,
+	ANALYSIS_TYPE_DC_TRANSFER,
+	ANALYSIS_TYPE_AC,
+	ANALYSIS_TYPE_TRANSFER,
+	ANALYSIS_TYPE_DISTORTION,
+	ANALYSIS_TYPE_NOISE,
+	ANALYSIS_TYPE_POLE_ZERO,
+	ANALYSIS_TYPE_SENSITIVITY,
+	ANALYSIS_TYPE_FOURIER,
+	ANALYSIS_TYPE_UNKNOWN
 } AnalysisType;
 
 #define INFINITE 1e50f
 
+//keep in mind the relation to global variable
+//const char const *SimulationFunctionTypeString[]
+//in simulation.c (strings representing the functions in GUI)
 typedef enum {
-	FUNCTION_MINUS = 0,
-	FUNCTION_TRANSFER
+	FUNCTION_SUBTRACT = 0,
+	FUNCTION_DIVIDE
 } SimulationFunctionType;
 
-typedef struct _SimulationFunction {
+typedef struct _SimulationFunction
+{
 	SimulationFunctionType type;
 	guint first;
 	guint second;
 } SimulationFunction;
 
-struct _SimulationData {
+struct _SimulationData
+{
 	AnalysisType type;
-	gint		 state;
-	gint		 n_variables;
-	gchar	   **var_names;
-	gchar	   **var_units;
-	GArray	   **data;
-	gdouble		*min_data;
-	gdouble		*max_data;
-	gint		 got_var;
-	gint		 got_points;
+	gint n_variables;
+	gchar **var_names;
+	gchar **var_units;
+	GArray **data;
+	gdouble *min_data;
+	gdouble *max_data;
+	gint got_var;
+	gint got_points;
 
 	// Functions  typeof SimulationFunction
-	GList 		*functions;
+	GList *functions;
 };
 
-
-typedef struct {
+typedef struct
+{
 	SimulationData sim_data;
-	int		 state;
+	int state;
 } SimOp;
 
-typedef struct {
+typedef struct
+{
 	SimulationData sim_data;
-	double		   freq;
-	gint		   nb_var;
+	double freq;
+	gint nb_var;
 } SimFourier;
 
-typedef struct {
+typedef struct
+{
 	SimulationData sim_data;
-	int		 state;
-	double	 sim_length;
-	double	 step_size;
+	int state;
+	double sim_length;
+	double step_size;
 } SimTransient;
 
-typedef struct {
+typedef struct
+{
 	SimulationData sim_data;
-	int		 state;
-	double	 sim_length;
-	double	 start,stop;
+	int state;
+	double sim_length;
+	double start, stop;
 } SimAC;
 
-typedef struct {
+typedef struct
+{
 	SimulationData sim_data;
-	int		 state;
-	double	 sim_length;
-	double	 start,stop,step;
+	int state;
+	double sim_length;
+	double start, stop, step;
 } SimDC;
 
-typedef union {
-	SimOp		 op;
+typedef struct
+{
+	SimulationData sim_data;
+	int state;
+	double sim_length;
+	double start, stop;
+} SimNoise;
+
+typedef union
+{
+	SimOp op;
 	SimTransient transient;
-	SimFourier	 fourier;
-	SimAC		 ac;
-	SimDC		 dc;
+	SimFourier fourier;
+	SimAC ac;
+	SimDC dc;
+	SimNoise noise;
 } Analysis;
 
-void simulation_show (GtkWidget *widget, SchematicView *sv);
-gpointer simulation_new (Schematic *sm);
-gchar *sim_engine_analysis_name (SimulationData *);
+void simulation_show_progress_bar (GtkWidget *widget, SchematicView *sv);
+gpointer simulation_new (Schematic *sm, Log *logstore);
 
-#define SIM_DATA(obj)			   ((SimulationData *)(obj))
-#define ANALYSIS(obj)			   ((Analysis *)(obj))
+#define SIM_DATA(obj) ((SimulationData *)(obj))
+#define ANALYSIS(obj) ((Analysis *)(obj))
 
 #endif /* __SIMULATION_H */

@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef __SHEET_PRIVATE_H
@@ -38,47 +38,37 @@
 
 #include "sheet.h"
 #include "create-wire.h"
+#include "rubberband.h"
 
-typedef enum {
-	RUBBER_NO = 0,
-	RUBBER_YES,
-	RUBBER_START
-} RubberState;
-
-typedef struct {
-	RubberState		 state;
-	int 			 timeout_id;
-	int 			 click_start_state;
-	GooCanvasItem	*rectangle;
-	double	 		 start_x, start_y;
-} RubberbandInfo;
-	
-struct _SheetPriv {
-	// Keeps the current signal handler for wire creation.	
-	int 				 wire_handler_id;
+struct _SheetPriv
+{
+	// Keeps the current signal handler for wire creation
+	int wire_handler_id;
 	// Keeps the signal handler for floating objects.
-	int 				 float_handler_id;
+	int float_handler_id;
 
-	double 				 zoom;
-	gulong 				 width;
-	gulong  			 height;
+	double zoom;
+	gulong width;
+	gulong height;
 
-	GooCanvasGroup		*selected_group;
-	GooCanvasGroup		*floating_group;
-	GList				*selected_objects;
-	GList				*floating_objects;
+	GooCanvasGroup *selected_group;
+	GooCanvasGroup *floating_group;
+	GList *selected_objects;
+	GList *floating_objects;
 
-	GList				*items;
-	RubberbandInfo		*rubberband;
-	GList 				*preserve_selection_items;
-	GooCanvasClass		*sheet_parent_class;
+	GList *items;
+	RubberbandInfo *rubberband_info;
+	GList *preserve_selection_items;
+	GooCanvasClass *sheet_parent_class;
 
-	GList 				*voltmeter_items; // List of GooCanvasItem
-	GHashTable 			*voltmeter_nodes;
+	GHashTable *voltmeter_nodes;
 
-	CreateWireContext 	*create_wire_context; // Wire context for each schematic
+	CreateWireInfo *create_wire_info; // Wire context for each schematic
 
-	GHashTable 			*node_dots;
+	GHashTable *node_dots;
+
+	guint8 keyboard_grabbed : 1;
+	guint8 pointer_grabbed : 1;
 };
 
 #endif

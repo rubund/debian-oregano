@@ -5,8 +5,8 @@
  * Author:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
- * 
- * Web page: https://github.com/marc-lorber/oregano
+ *
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001	Richard Hult
  * Copyright (C) 2003,2006	Ricardo Markiewicz
@@ -24,8 +24,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef _OREGANO_SPLASH_H_
@@ -35,15 +35,16 @@
 
 typedef struct _Splash Splash;
 
-struct _Splash {
+struct _Splash
+{
 	GtkWindow *win;
 	GtkWidget *progress;
 	GtkWidget *event;
-	GtkLabel  *lbl;
+	GtkLabel *lbl;
 	gboolean can_destroy;
 };
 
-Splash *oregano_splash_new ();
+Splash *oregano_splash_new (GError **error);
 gboolean oregano_splash_free (Splash *);
 void oregano_splash_step (Splash *, char *s);
 void oregano_splash_done (Splash *, char *s);

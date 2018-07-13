@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include <glib.h>
@@ -36,13 +36,13 @@
 #include "sheet-item.h"
 #include "clipboard.h"
 
-struct _ClipboardData {
+struct _ClipboardData
+{
 	ItemData *item_data;
 	SheetItemClass *item_class;
 };
 
-void
-clipboard_empty (void)
+void clipboard_empty (void)
 {
 	GSList *list;
 	ClipboardData *cb_data;
@@ -61,8 +61,7 @@ clipboard_empty (void)
 	oregano.clipboard = NULL;
 }
 
-gboolean
-clipboard_is_empty (void)
+gboolean clipboard_is_empty (void)
 {
 	if (oregano.clipboard == NULL)
 		return TRUE;
@@ -70,8 +69,7 @@ clipboard_is_empty (void)
 	return g_slist_length (oregano.clipboard) > 0 ? FALSE : TRUE;
 }
 
-void
-clipboard_foreach (ClipBoardFunction callback, gpointer user_data)
+void clipboard_foreach (ClipBoardFunction callback, gpointer user_data)
 {
 	GSList *list;
 	ClipboardData *data;
@@ -85,8 +83,7 @@ clipboard_foreach (ClipBoardFunction callback, gpointer user_data)
 	}
 }
 
-void
-clipboard_add_object (GObject *item)
+void clipboard_add_object (GObject *item)
 {
 	ItemDataClass *id_class;
 	ItemData *item_data, *clone;
@@ -111,16 +108,14 @@ clipboard_add_object (GObject *item)
 	oregano.clipboard = g_slist_prepend (oregano.clipboard, cb_data);
 }
 
-GObject *
-clipboard_data_get_item_data (ClipboardData *data)
+GObject *clipboard_data_get_item_data (ClipboardData *data)
 {
 	g_return_val_if_fail (data != NULL, NULL);
 
 	return G_OBJECT (data->item_data);
 }
 
-GObjectClass *
-clipboard_data_get_item_class (ClipboardData *data)
+GObjectClass *clipboard_data_get_item_class (ClipboardData *data)
 {
 	g_return_val_if_fail (data != NULL, NULL);
 

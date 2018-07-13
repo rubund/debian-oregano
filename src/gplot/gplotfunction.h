@@ -5,8 +5,8 @@
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
- * 
+ * Web page: https://ahoi.io/project/oregano
+ *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2004  Ricardo Markiewicz
  * Copyright (C) 2009-2010  Marc Lorber
@@ -23,8 +23,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef _GPLOT_FUNCTION_H_
@@ -32,19 +32,20 @@
 
 #include <gtk/gtk.h>
 
-#define GPLOT_FUNCTION(obj)     G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_GPLOT_FUNCTION, GPlotFunction)
-#define IS_GPLOT_FUNCTION(obj)  G_TYPE_CHECK_INSTANCE_TYPE (obj, TYPE_GPLOT_FUNCTION)
+#define GPLOT_FUNCTION(obj) G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_GPLOT_FUNCTION, GPlotFunction)
+#define IS_GPLOT_FUNCTION(obj) G_TYPE_CHECK_INSTANCE_TYPE (obj, TYPE_GPLOT_FUNCTION)
 
-typedef struct _GPlotFunctionBBox {
+typedef struct _GPlotFunctionBBox
+{
 	gdouble xmin;
 	gdouble ymin;
 	gdouble xmax;
 	gdouble ymax;
 } GPlotFunctionBBox;
 
-void     g_plot_function_draw (GPlotFunction *, cairo_t *, GPlotFunctionBBox *);
-void     g_plot_function_get_bbox (GPlotFunction *, GPlotFunctionBBox *);
-void     g_plot_function_set_visible (GPlotFunction *, gboolean);
+void g_plot_function_draw (GPlotFunction *, cairo_t *, GPlotFunctionBBox *);
+void g_plot_function_get_bbox (GPlotFunction *, GPlotFunctionBBox *);
+void g_plot_function_set_visible (GPlotFunction *, gboolean);
 gboolean g_plot_function_get_visible (GPlotFunction *);
 
 #endif

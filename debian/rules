@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+#export DH_OPTIONS=-v
+
+PWD   := $(shell pwd)
+
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	./waf --prefix="/usr" configure
+
+override_dh_auto_clean:
+	./waf distclean
+
+override_dh_auto_build:
+	./waf debug
+
+override_dh_auto_install:
+	./waf --prefix="/usr" --destdir=$(PWD)/debian/oregano install
+
+override_dh_usrlocal:
+	@echo "skippy skip <dh_usrlocal>"
+
+override_dh_shlibdeps:
+	dpkg-shlibdeps -Tdebian/oregano.substvars debian/oregano/usr/bin/oregano

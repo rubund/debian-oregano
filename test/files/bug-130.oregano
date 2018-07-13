@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ogo:schematic xmlns:ogo="https://beerbach.me/project/oregano/ns/v1">
+  <ogo:author>bernhard</ogo:author>
+  <ogo:title>bug-130.oregano</ogo:title>
+  <ogo:comments/>
+  <ogo:grid>
+    <ogo:visible>true</ogo:visible>
+    <ogo:snap>true</ogo:snap>
+  </ogo:grid>
+  <ogo:simulation-settings>
+    <ogo:transient>
+      <ogo:enabled>true</ogo:enabled>
+      <ogo:start>0</ogo:start>
+      <ogo:stop>0.005</ogo:stop>
+      <ogo:step>0.0001</ogo:step>
+      <ogo:step-enabled>false</ogo:step-enabled>
+      <ogo:init-conditions>false</ogo:init-conditions>
+    </ogo:transient>
+    <ogo:ac>
+      <ogo:enabled>false</ogo:enabled>
+      <ogo:npoints>50</ogo:npoints>
+      <ogo:start>1</ogo:start>
+      <ogo:stop>1e+06</ogo:stop>
+    </ogo:ac>
+    <ogo:dc-sweep>
+      <ogo:enabled>false</ogo:enabled>
+      <ogo:vsrc1/>
+      <ogo:start1>0</ogo:start1>
+      <ogo:stop1>0</ogo:stop1>
+      <ogo:step1>0</ogo:step1>
+    </ogo:dc-sweep>
+    <ogo:fourier>
+      <ogo:enabled>false</ogo:enabled>
+      <ogo:freq>0</ogo:freq>
+      <ogo:vout>0</ogo:vout>
+    </ogo:fourier>
+  </ogo:simulation-settings>
+  <ogo:parts/>
+  <ogo:wires>
+    <ogo:wire>
+      <ogo:points>(540 150)(540 220)</ogo:points>
+    </ogo:wire>
+    <ogo:wire>
+      <ogo:points>(310 220)(540 220)</ogo:points>
+      <ogo:points>(540 220)(620 220)</ogo:points>
+    </ogo:wire>
+  </ogo:wires>
+  <ogo:textboxes/>
+</ogo:schematic>

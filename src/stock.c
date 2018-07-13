@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -26,8 +26,8 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 /*
  * Stock icon code, stolen from:
@@ -57,15 +57,14 @@
 #include "stock/zoom_pan.xpm"
 #include "stock/zoom_region.xpm"
 
-static void
-add_stock_entry (const gchar *stock_id, char **xpm_data)
+static void add_stock_entry (const gchar *stock_id, char **xpm_data)
 {
 	static GtkIconFactory *factory = NULL;
 	GdkPixbuf *pixbuf;
 	GtkIconSet *icon_set;
 
 	if (!factory) {
-		factory =gtk_icon_factory_new ();
+		factory = gtk_icon_factory_new ();
 		gtk_icon_factory_add_default (factory);
 	}
 
@@ -76,8 +75,7 @@ add_stock_entry (const gchar *stock_id, char **xpm_data)
 	g_object_unref (G_OBJECT (pixbuf));
 }
 
-void
-stock_init (void)
+void stock_init (void)
 {
 	add_stock_entry (STOCK_PIXMAP_SIM_SETTINGS, sim_settings_xpm);
 	add_stock_entry (STOCK_PIXMAP_ROTATE, rotate_xpm);

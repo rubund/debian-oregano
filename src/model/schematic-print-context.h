@@ -1,15 +1,18 @@
 /*
  * schematic-print-context.h
  *
+ *
  * Authors:
  *  Ricardo Markiewicz <rmarkie@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
+ *  Bernhard Schuster <bernhard@ahoi.io>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
+ * Copyright (C) 2013       Bernhard Schuster
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,23 +26,25 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 #ifndef _SCHEMATIC_PRINT_CONTEXT_
 #define _SCHEMATIC_PRINT_CONTEXT_
 
 #include <gdk/gdk.h>
 
-typedef struct _SchematicColors {
-	GdkColor components;
-	GdkColor labels;
-	GdkColor wires;
-	GdkColor text;
-	GdkColor background;
+typedef struct _SchematicColors
+{
+	GdkRGBA components;
+	GdkRGBA labels;
+	GdkRGBA wires;
+	GdkRGBA text;
+	GdkRGBA background;
 } SchematicColors;
 
-typedef struct _SchematicPrintContext {
+typedef struct _SchematicPrintContext
+{
 	SchematicColors colors;
 } SchematicPrintContext;
 

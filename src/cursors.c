@@ -8,7 +8,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 1999-2001  Richard Hult
  * Copyright (C) 2003,2006  Ricardo Markiewicz
@@ -26,46 +26,39 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include "cursors.h"
+#include "debug.h"
 
 OreganoCursor oregano_cursors[] = {
-	{ NULL, GDK_LEFT_PTR },
-	{ NULL, GDK_TCROSS },
-	{ NULL, GDK_PENCIL },
-	{ NULL, GDK_XTERM },
-	{ NULL, -1 }
-};
+    {NULL, GDK_LEFT_PTR}, {NULL, GDK_TCROSS}, {NULL, GDK_PENCIL}, {NULL, GDK_XTERM}, {NULL, -1}};
 
-void
-cursors_init (void)
+void cursors_init (void)
 {
 	int i;
 	GdkDisplay *display;
 
-	display = gdk_display_get_default();
+	display = gdk_display_get_default ();
 
 	for (i = 0; oregano_cursors[i].type != -1; i++) {
-		oregano_cursors[i].cursor = 
-			gdk_cursor_new_for_display (display,
-		                                oregano_cursors[i].type);
+		oregano_cursors[i].cursor = gdk_cursor_new_for_display (display, oregano_cursors[i].type);
 	}
 }
 
-void
-cursors_shutdown (void)
+void cursors_shutdown (void)
 {
 	int i;
 
-	for (i = 0; oregano_cursors[i].type != -1; i++)
-		g_object_unref (oregano_cursors[i].cursor);
+	for (i = 0; oregano_cursors[i].type != -1; i++) {
+		if (oregano_cursors[i].cursor)
+			g_object_unref (oregano_cursors[i].cursor);
+	}
 }
 
-void
-cursor_set_widget (GtkWidget *w, int name)
+void cursor_set_widget (GtkWidget *w, int name)
 {
 	if (gtk_widget_get_window (w))
 		gdk_window_set_cursor (gtk_widget_get_window (w), oregano_cursors[name].cursor);

@@ -7,7 +7,7 @@
  *  Andres de Barbara <adebarbara@fi.uba.ar>
  *  Marc Lorber <lorber.marc@wanadoo.fr>
  *
- * Web page: https://github.com/marc-lorber/oregano
+ * Web page: https://ahoi.io/project/oregano
  *
  * Copyright (C) 2003,2006 Ricardo Markiewicz
  * Copyright (C) 2009-2012  Marc Lorber
@@ -24,26 +24,22 @@
  *
  * You should have received a copy of the GNU General Public
  * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include "file-manager.h"
 
 FileType file_types[] = {
-	FILE_TYPE ("oregano", "Oregano Schematic File", schematic_parse_xml_file, 
-	           schematic_write_xml)
-};
+    FILE_TYPE ("oregano", "Oregano Schematic File", schematic_parse_xml_file, schematic_write_xml)};
 
-#define FILE_TYPES_COUNT (sizeof(file_types)/sizeof(FileType))
+#define FILE_TYPES_COUNT (sizeof(file_types) / sizeof(FileType))
 
-
-FileType *
-file_manager_get_handler (const gchar *fname)
+FileType *file_manager_get_handler (const gchar *fname)
 {
 	int i;
 	gchar *ext, *ptr;
-	FileType *ft = NULL; 
+	FileType *ft = NULL;
 
 	g_return_val_if_fail (fname != NULL, NULL);
 
@@ -57,7 +53,7 @@ file_manager_get_handler (const gchar *fname)
 		ptr++;
 	}
 
-	for (i=0; i<FILE_TYPES_COUNT; i++)
+	for (i = 0; i < FILE_TYPES_COUNT; i++)
 		if (!strcmp (file_types[i].extension, ext)) {
 			ft = &file_types[i];
 			break;
