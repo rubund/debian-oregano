@@ -6,11 +6,11 @@ Subject: clang_FTBFS_Wreturn-type
  src/model/item-data.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-Index: debian-oregano/src/model/item-data.c
-===================================================================
---- debian-oregano.orig/src/model/item-data.c
-+++ debian-oregano/src/model/item-data.c
-@@ -453,8 +453,8 @@ void item_data_set_property (ItemData *d
+diff --git a/src/model/item-data.c b/src/model/item-data.c
+index c9391d4..0aacf2d 100644
+--- a/src/model/item-data.c
++++ b/src/model/item-data.c
+@@ -453,8 +453,8 @@ void item_data_set_property (ItemData *data, char *property, char *value)
  {
  	ItemDataClass *id_class;
  

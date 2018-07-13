@@ -1,8 +1,0 @@
-From: Maximiliano Curia <maxy@debian.org>
-Date: Sat, 7 Nov 2015 16:00:53 +0100
-Subject: math-library
-
----
- src/Makefile.am | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
