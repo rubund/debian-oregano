@@ -9,10 +9,10 @@ LDFLAGS += -lcairo
 	dh $@ --with autoreconf
 
 override_dh_auto_configure:
-	./waf configure --release
+	./waf configure --release --prefix=/usr
 
 override_dh_auto_build:
-	./waf build --release
+	./waf build --release --prefix=/usr
 
 override_dh_auto_install:
-	./waf install --destdir=debian/oregano
+	./waf install --destdir=debian/oregano --prefix=/usr
