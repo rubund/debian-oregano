@@ -15,4 +15,4 @@ override_dh_auto_build:
 	./waf build --release
 
 override_dh_auto_install:
-	./waf install
+	./waf install --destdir=debian/tmp
