@@ -6,7 +6,6 @@
 # debian/watch; instead you should set it below; however this should
 # still match the dversionmangle in that file.
 
-repacksuffix="+dfsg.1"
 unwaf_paths=.
 
 # You shouldn't need to change anything below here.
@@ -18,7 +17,6 @@ upstream="$2"
 filename="$3"
 
 source="$(dpkg-parsechangelog -SSource)"
-newups="${upstream}${repacksuffix}"
 basedir="$(dirname "$filename")"
 
 unpack_waf() {
@@ -33,18 +31,18 @@ unpack_waf() {
 	cd "$olddir"
 }
 
-set -e
 
 mkdir tmp
 pushd tmp
 tar -xzf "../../${source}_${upstream}.orig.tar.gz"
 SUBDIR=`ls`
+echo $SUBDIR
 cd ${SUBDIR}
 for i in $unwaf_paths; do unpack_waf "$i"; done
 cd ..
-mv ${SUBDIR} "${source}-${newups}"
-GZIP="-9fn" tar -czf "../../${source}_${newups}.orig.tar.gz" "${source}-${newups}"
-rm -rf "${source}-${newups}"
+rm -f ../../${source}_${upstream}.orig.tar.gz
+GZIP="-9fn" tar -czf "../../${source}_${upstream}.orig.tar.gz" ${SUBDIR}
+rm -rf ${SUBDIR}
 
 popd
 rm -rf tmp
