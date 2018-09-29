@@ -1,3 +1,4 @@
-version=3
-opts=filenamemangle=s|^.*/archive/v|oregano-| \
-    https://github.com/drahnr/oregano/tags .*/archive/v(\d[\d\.]+).tar.gz
+version=4
+opts=dversionmangle=s/\+dfsg\.\d+//,\
+oversionmangle=s/$/\+dfsg\.1/ \
+https://github.com/drahnr/oregano/tags .*/archive/v(\d[\d\.]+).tar.gz debian debian/repack-waf
