@@ -16,3 +16,9 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	./waf install --destdir=debian/oregano --prefix=/usr
+
+override_dh_clean:
+	dh_clean
+	find waflib/ -name "*.pyc" -delete
+	$(RM) .lock-waf_linux2_build
+	$(RM) -r build
